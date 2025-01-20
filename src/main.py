@@ -19,7 +19,7 @@ logging.basicConfig(
 
 class MusicRecommendationFungus:
     def __init__(self):
-        logging.info("[INIT] Initializing Music Recommendation instance")
+        logging.info("[INIT] Initializing iFungus instance")
         self.mastodon_client = MastodonClient()
         self.knowledge_graph = RDFKnowledgeGraph(mastodon_client=self.mastodon_client)
         self.knowledge_graph.insert_songs_from_csv('songs.csv')
@@ -112,6 +112,6 @@ class MusicRecommendationFungus:
             logging.info(f"[EVOLVE] Feedback threshold mutated from {old_threshold} to {self.feedback_threshold}")
 
 if __name__ == "__main__":
-    logging.info("[STARTUP] Launching MusicRecommendationFungus instance")
+    logging.info("[STARTUP] Launching iFungus instance")
     baby_fungus = MusicRecommendationFungus()
     baby_fungus.start()
