@@ -40,49 +40,6 @@ class RDFKnowledgeGraph:
         self.mastodon_client.post_status(f"Request-to-join: Looking for a training group. {self.mastodon_client.nutrial_tag}")
         return None
 
-    def look_for_song_data_in_statuses_to_insert(self, messages):
-        logging.info("Look for song data in mastodon statuses to insert")
-        if messages is None:
-            return
-
-        song_id_counter = len(self.songs_data.index) + 1
-        for message in messages:
-            if "song-data" in message:
-                [title, genre, artist, tempo, duration] = self.extra_song_data_from_status_content(message)
-                if title is not None and self.is_number(tempo) and self.is_number(duration):
-                    logging.info("Insert song from Mastodon: "
-                     + str(song_id_counter) + " "
-                     + str(title) + " "
-                     + str(genre) + " "
-                     + str(artist) + " "
-                     + str(tempo) + " "
-                     + str(duration)
-                    )
-                    self.insert_song_data(song_id_counter, title, genre, artist, int(tempo), int(duration))
-                    song_id_counter = song_id_counter + 1
-
-    def extra_song_data_from_status_content(self, text):
-        # Find the index of "song-data:"
-        model_link_index = text.find("song-data:")
-
-        if model_link_index == -1:
-            return ""
-
-        # Extract the substring after "song-data:"
-        result = text[model_link_index + len("song-data:") + 1:]
-
-        # Find the index of the first whitespace character
-        whitespace_index = result.find("]")
-
-        if whitespace_index != -1:
-            result = result[:whitespace_index + 1]
-            if self.is_json(result):
-                return json.loads(result)
-            else:
-                return [None, None, None, None, None]
-        else:
-            return [None, None, None, None, None]
-
     def save_model(self, model_name, model):
         """
         Save the model into the RDF Knowledge Graph by storing its state dictionary.

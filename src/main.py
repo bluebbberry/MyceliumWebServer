@@ -39,7 +39,6 @@ class MusicRecommendationFungus:
                     logging.info("[CHECK] Searching for a new fungus group")
                     messages, random_mycelial_tag = self.mastodon_client.get_statuses_from_random_mycelial_tag()
                     link_to_model = self.knowledge_graph.look_for_new_fungus_group_in_statuses(messages, random_mycelial_tag)
-                    self.knowledge_graph.look_for_song_data_in_statuses_to_insert(messages)
                     self.knowledge_graph.on_found_group_to_join(link_to_model)
                 else:
                     logging.info("[WAIT] No new groups found.")
@@ -93,8 +92,8 @@ class MusicRecommendationFungus:
         fresh_statuses = filter(lambda s: s["id"] not in self.mastodon_client.ids_of_replied_statuses, statuses)
         for status in fresh_statuses:
             if "[FUNGUS]" not in status['content']:
-                song_titles = self.machine_learning_service.get_song_recommendations(status['content'], 3)
-                self.mastodon_client.reply_to_status(status['id'], status['account']['username'], "[FUNGUS] " + str(song_titles))
+                answer = self.machine_learning_service.get_answer(status['content'])
+                self.mastodon_client.reply_to_status(status['id'], status['account']['username'], "[FUNGUS] " + str(answer))
         # count feedback
         num_of_statuses_send = len(self.mastodon_client.ids_of_replied_statuses)
         overall_favourites = self.mastodon_client.count_likes_of_all_statuses()

@@ -30,17 +30,13 @@ class TestMLService(unittest.TestCase):
 
     def test_get_song_recommendations(self):
         self.service.train_model()
-        recommendations = self.service.get_song_recommendations('Song A', top_n=2)
+        recommendations = self.service.get_answer('Song A', top_n=2)
         self.assertEqual(len(recommendations), 2)
         self.assertTrue(all(isinstance(song, str) for song in recommendations))
 
     def test_recommend_songs_for_user_no_data(self):
         with self.assertRaises(ValueError):
-            self.service.recommend_songs_for_user(user_id=1)
-
-    def test_extract_song_from_string(self):
-        result = self.service.extract_song_from_string("I love Song A!")
-        self.assertEqual(result, "Song A")
+            self.service.get_answer(user_id=1)
 
 if __name__ == '__main__':
     unittest.main()

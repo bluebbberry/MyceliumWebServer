@@ -69,7 +69,7 @@ class LLMService:
 
             print(f"Epoch {epoch + 1}/{self.num_epochs}, Loss: {total_loss:.4f}")
 
-    def get_song_recommendations(self, title, top_n=5):
+    def get_answer(self, title):
         """Recommend the top N songs using the model's learned embeddings."""
         self.model.eval()
         input_data = self.rdf_knowledge_graph.songs_data
@@ -91,6 +91,6 @@ class LLMService:
 
             # Compute cosine similarity
             similarity_matrix = torch.nn.functional.cosine_similarity(song_embedding, all_embeddings, dim=1)
-            top_indices = similarity_matrix.argsort(descending=True)[1:top_n + 1]  # Exclude the input song itself
+            top_indices = similarity_matrix.argsort(descending=True)[1:1 + 1]
 
         return input_data.iloc[top_indices]['title'].values
