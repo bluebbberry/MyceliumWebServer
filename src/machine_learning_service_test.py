@@ -1,7 +1,7 @@
 import unittest
 import torch
 import pandas as pd
-from machine_learning_service import MLService
+from machine_learning_service import LLMService
 
 class MockRDFKnowledgeGraph:
     def __init__(self):
@@ -17,7 +17,7 @@ class MockRDFKnowledgeGraph:
 class TestMLService(unittest.TestCase):
     def setUp(self):
         self.rdf_knowledge_graph = MockRDFKnowledgeGraph()
-        self.service = MLService(rdf_knowledge_graph=self.rdf_knowledge_graph)
+        self.service = LLMService(rdf_knowledge_graph=self.rdf_knowledge_graph)
 
     def test_preprocess_data(self):
         features_encoded, song_ids = self.service.preprocess_data()
@@ -26,7 +26,7 @@ class TestMLService(unittest.TestCase):
 
     def test_train_model(self):
         self.service.train_model()
-        self.assertIsInstance(self.service.model, MLService.ContentBasedNeuralNetwork)
+        self.assertIsInstance(self.service.model, LLMService.ContentBasedNeuralNetwork)
 
     def test_get_song_recommendations(self):
         self.service.train_model()

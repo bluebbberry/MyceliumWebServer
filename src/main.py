@@ -6,7 +6,7 @@ from rdf_knowledge_graph import RDFKnowledgeGraph
 from mastodon_client import MastodonClient
 import datetime
 import random
-from machine_learning_service import MLService
+from machine_learning_service import LLMService
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -23,7 +23,7 @@ class MusicRecommendationFungus:
         self.mastodon_client = MastodonClient()
         self.knowledge_graph = RDFKnowledgeGraph(mastodon_client=self.mastodon_client)
         self.knowledge_graph.insert_songs_from_csv('songs.csv')
-        self.machine_learning_service = MLService(self.knowledge_graph, user_ratings_csv='user_ratings.csv')
+        self.machine_learning_service = LLMService(self.knowledge_graph, user_ratings_csv='user_ratings.csv')
         self.knowledge_graph.insert_model_state("my-model", self.machine_learning_service.model.get_state())
         self.feedback_threshold = float(os.getenv("FEEDBACK_THRESHOLD", 0.5))
         logging.info(f"[CONFIG] Feedback threshold set to {self.feedback_threshold}")
@@ -93,7 +93,7 @@ class MusicRecommendationFungus:
         fresh_statuses = filter(lambda s: s["id"] not in self.mastodon_client.ids_of_replied_statuses, statuses)
         for status in fresh_statuses:
             if "[FUNGUS]" not in status['content']:
-                song_titles = self.machine_learning_service.get_song_recommendations(self.machine_learning_service.extract_song_from_string(status['content']), 3)
+                song_titles = self.machine_learning_service.get_song_recommendations(status['content'], 3)
                 self.mastodon_client.reply_to_status(status['id'], status['account']['username'], "[FUNGUS] " + str(song_titles))
         # count feedback
         num_of_statuses_send = len(self.mastodon_client.ids_of_replied_statuses)
