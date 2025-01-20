@@ -1,0 +1,16 @@
+.message-bubble {
+  max-width: 70%;
+  margin: 5px 0;
+  padding: 10px;
+  border-radius: 10px;
+}
+.message-bubble.user {
+  background-color: #4caf50;
+  color: white;
+  align-self: flex-end;
+}
+.message-bubble.bot {
+  background-color: #e0e0e0;
+  color: black;
+  align-self: flex-start;
+}
