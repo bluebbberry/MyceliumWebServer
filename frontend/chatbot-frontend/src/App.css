@@ -1,21 +1,59 @@
-.App {
-  text-align: center;
-  font-family: Arial, sans-serif;
-  margin: 0 auto;
-  max-width: 600px;
+/* App.css */
+.chat-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background-color: #f0f0f0;
+}
+
+.chat-box {
+  width: 400px;
+  max-width: 100%;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   padding: 20px;
-}
-.chatbot {
   display: flex;
   flex-direction: column;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-  padding: 10px;
-  max-height: 70vh;
+}
+
+.messages {
+  flex-grow: 1;
   overflow-y: auto;
+  margin-bottom: 15px;
 }
-.message-list {
+
+.message {
+  background-color: #f1f1f1;
+  padding: 10px;
+  margin: 5px 0;
+  border-radius: 5px;
+  max-width: 80%;
+  word-wrap: break-word;
+}
+
+.input-container {
   display: flex;
-  flex-direction: column;
-  gap: 5px;
+}
+
+.message-input {
+  flex-grow: 1;
+  padding: 10px;
+  border-radius: 5px;
+  border: 1px solid #ddd;
+  margin-right: 10px;
+}
+
+.send-button {
+  padding: 10px 15px;
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.send-button:hover {
+  background-color: #45a049;
 }
