@@ -1,0 +1,101 @@
+song_id,title,genre,artist,tempo,duration
+1,Blinding Lights,Pop,The Weeknd,171,200
+2,Shape of You,Pop,Ed Sheeran,96,233
+3,Someone Like You,Pop,Adele,67,285
+4,Bohemian Rhapsody,Rock,Queen,72,355
+5,Smells Like Teen Spirit,Rock,Nirvana,117,302
+6,Hotel California,Rock,Eagles,75,390
+7,Uptown Funk,Funk,Mark Ronson,115,270
+8,Rolling in the Deep,Soul,Adele,105,228
+9,Billie Jean,Pop,Michael Jackson,116,294
+10,Wonderwall,Rock,Oasis,87,258
+11,Take On Me,Pop,A-ha,169,228
+12,Thunderstruck,Rock,AC/DC,134,292
+13,Let It Be,Rock,The Beatles,73,243
+14,American Idiot,Punk,Green Day,186,176
+15,Hallelujah,Folk,Leonard Cohen,56,260
+16,Roxanne,Rock,The Police,125,181
+17,Paint It Black,Rock,The Rolling Stones,160,227
+18,Sweet Child o' Mine,Rock,Guns N' Roses,125,356
+19,I Will Survive,Disco,Gloria Gaynor,117,198
+20,Radioactive,Alternative,Imagine Dragons,136,186
+21,Shake It Off,Pop,Taylor Swift,160,219
+22,Counting Stars,Pop,OneRepublic,122,257
+23,Don't Stop Believin',Rock,Journey,118,251
+24,Another One Bites the Dust,Rock,Queen,110,216
+25,Eye of the Tiger,Rock,Survivor,109,245
+26,Chandelier,Pop,Sia,96,216
+27,Hurt,Country,Johnny Cash,84,211
+28,Time,Rock,Pink Floyd,120,409
+29,Seven Nation Army,Rock,The White Stripes,120,231
+30,Somebody That I Used to Know,Pop,Gotye,129,244
+31,Viva La Vida,Pop,Coldplay,138,242
+32,Counting Stars,Pop,OneRepublic,122,257
+33,The Sound of Silence,Folk,Simon & Garfunkel,98,186
+34,Clocks,Pop,Coldplay,120,307
+35,Take Me to Church,Indie,Hozier,128,241
+36,My Heart Will Go On,Pop,Celine Dion,98,274
+37,Stayin' Alive,Disco,Bee Gees,104,284
+38,What's Up?,Rock,4 Non Blondes,122,269
+39,We Will Rock You,Rock,Queen,82,122
+40,All Star,Rock,Smash Mouth,104,195
+41,Back in Black,Rock,AC/DC,94,255
+42,Good Vibrations,Pop,The Beach Boys,87,217
+43,Wake Me Up,Pop,Avicii,124,247
+44,Africa,Rock,Toto,92,294
+45,No Woman No Cry,Reggae,Bob Marley,79,464
+46,Suspicious Minds,Rock,Elvis Presley,120,269
+47,Thriller,Pop,Michael Jackson,118,357
+48,Levitating,Pop,Dua Lipa,103,203
+49,In the End,Rock,Linkin Park,106,216
+50,Shake It Off,Pop,Taylor Swift,160,219
+51,Smash Into You,R&B,Beyoncé,94,220
+52,Yesterday,Rock,The Beatles,85,123
+53,Hips Don't Lie,Pop,Shakira,100,218
+54,Firework,Pop,Katy Perry,124,228
+55,Bad Guy,Pop,Billie Eilish,135,194
+56,Dancing Queen,Disco,ABBA,100,230
+57,September,Disco,Earth Wind & Fire,126,215
+58,Watermelon Sugar,Pop,Harry Styles,95,174
+59,Old Town Road,Country,Lil Nas X,136,157
+60,Lucid Dreams,Rap,Juice WRLD,84,239
+61,Sunflower,Pop,Post Malone,90,158
+62,Sucker,Pop,Jonas Brothers,138,181
+63,The Middle,Pop,Zedd,134,204
+64,Memories,Pop,Maroon 5,91,189
+65,If I Ain't Got You,R&B,Alicia Keys,76,228
+66,Perfect,Pop,Ed Sheeran,63,263
+67,Don't Let Me Down,EDM,The Chainsmokers,160,208
+68,Rather Be,EDM,Clean Bandit,121,241
+69,Cheap Thrills,Pop,Sia,90,225
+70,Faded,EDM,Alan Walker,90,212
+71,Counting Stars,Pop,OneRepublic,122,257
+72,Blinding Lights,Pop,The Weeknd,171,200
+73,All of Me,Pop,John Legend,120,269
+74,Demons,Pop,Imagine Dragons,90,177
+75,Love Story,Pop,Taylor Swift,120,235
+76,Boulevard of Broken Dreams,Rock,Green Day,84,260
+77,Jar of Hearts,Pop,Christina Perri,80,267
+78,The Nights,EDM,Avicii,126,189
+79,Stay,Pop,The Kid LAROI,90,176
+80,Riptide,Indie,Vance Joy,100,202
+81,Chasing Cars,Rock,Snow Patrol,104,245
+82,Somewhere Only We Know,Rock,Keane,118,233
+83,Mr. Brightside,Rock,The Killers,148,222
+84,Teenage Dream,Pop,Katy Perry,120,228
+85,Apologize,Pop,OneRepublic,120,225
+86,Counting Stars,Pop,OneRepublic,122,257
+87,The Man Who Sold the World,Rock,Nirvana,110,238
+88,Come As You Are,Rock,Nirvana,120,219
+89,Heroes,Rock,David Bowie,113,354
+90,Let Me Love You,Pop,DJ Snake,100,210
+91,Break Free,Pop,Ariana Grande,130,211
+92,Shallow,Pop,Lady Gaga,96,216
+93,The A Team,Pop,Ed Sheeran,85,256
+94,New Rules,Pop,Dua Lipa,117,208
+95,Don't Start Now,Pop,Dua Lipa,124,183
+96,Shivers,Pop,Ed Sheeran,130,207
+97,Peaches,R&B,Justin Bieber,90,198
+98,Montero (Call Me By Your Name),Pop,Lil Nas X,120,137
+99,Happier,EDM,Marshmello,100,214
+100,The Less I Know The Better,Indie,Tame Impala,118,216
