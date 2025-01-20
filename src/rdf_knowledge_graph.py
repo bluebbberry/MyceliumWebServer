@@ -84,37 +84,41 @@ class RDFKnowledgeGraph:
             return [None, None, None, None, None]
 
     def save_model(self, model_name, model):
+        """
+        Save the model into the RDF Knowledge Graph by storing its state dictionary.
+        """
         self.insert_model_state(model_name, model.get_state())
-
-    def fetch_all_model_from_knowledge_base(self, link_to_model):
-        return self.retrieve_all_model_states(link_to_model)
 
     def insert_model_state(self, model_name, model_state):
         """
-        Inserts the model parameters into the Fuseki knowledge base using base64 encoding.
+        Inserts the LLM model parameters into the Fuseki knowledge base using base64 encoding.
         """
-        # Convert tensors to lists for serialization
-        state_dict = {k: v.tolist() for k, v in model_state.items()}
+        state_dict = {k: v.tolist() for k, v in model_state.items()}  # Serialize tensors to lists
         state_json = json.dumps(state_dict)
         state_encoded = base64.b64encode(state_json.encode('utf-8')).decode('utf-8')
+
         sparql = SPARQLWrapper(self.update_url)
         sparql_insert_query = f'''
         PREFIX ex: <http://example.org/>
         PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
 
         INSERT DATA {{
-            ex:{model_name} a ex:ContentBasedModel ;
+            ex:{model_name} a ex:LLMModel ;
                             ex:modelState "{state_encoded}" .
         }}
         '''
         sparql.setQuery(sparql_insert_query)
         sparql.setMethod('POST')
         sparql.setReturnFormat(JSON)
+
         try:
             sparql.query()
-            print(f"Model '{model_name}' inserted successfully.")
+            logging.info(f"Model '{model_name}' inserted successfully into the knowledge base.")
         except Exception as e:
-            print(f"Error inserting model: {e}")
+            logging.error(f"Error inserting model: {e}")
+
+    def fetch_all_model_from_knowledge_base(self, link_to_model):
+        return self.retrieve_all_model_states(link_to_model)
 
     def insert_song_data(self, song_id, title, genre, artist, tempo, duration):
         """
