@@ -1,4 +1,5 @@
 # main.yp
+import json
 import threading
 import time
 import logging
@@ -118,7 +119,10 @@ class MusicRecommendationFungus:
             logging.info(f"[EVOLVE] Feedback threshold mutated from {old_threshold} to {self.feedback_threshold}")
 
     def get_song_recommendations(self, song_name):
-        return self.machine_learning_service.get_song_recommendations(song_name, 3)
+        recommendations = self.machine_learning_service.get_song_recommendations(song_name, 3)
+        if isinstance(recommendations, (list, tuple)):
+            recommendations = [rec.tolist() if hasattr(rec, 'tolist') else rec for rec in recommendations]
+        return recommendations
 
 
 logging.info("[STARTUP] Launching MusicRecommendationFungus instance")
@@ -134,7 +138,7 @@ def recommend():
 
     logging.info(f"[REQUEST] Received recommendation request for song: {song_name}")
     recommendations = music_service.get_song_recommendations(song_name)
-    return jsonify({"song_name": song_name, "recommendations": recommendations})
+    return jsonify({"song_name": song_name, "recommendations": recommendations[0]})
 
 
 if __name__ == "__main__":
