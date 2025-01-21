@@ -1,6 +1,6 @@
-![ifungus.jpg](ifungus.jpg)
+# MyceliumWebServer
 
-# iFungus
+Chatbots like ChatGPT lie on a centralized server. A federated AI chat bot distributes the learning on multiple PCs. The mycelium goes a step further: here, AI models can freely travel across the web as agents.
 
 This project realizes community-driven song-recommendation in a decentralized manner based on RDF Knowledge-Graph, Mastodon and decentralized federated learning. The idea: train a model on your local machine while collaborating with your friends and then use the model together through bots.
 
