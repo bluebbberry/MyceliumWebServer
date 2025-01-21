@@ -40,42 +40,81 @@ class RDFKnowledgeGraph:
         self.mastodon_client.post_status(f"Request-to-join: Looking for a training group. {self.mastodon_client.nutrial_tag}")
         return None
 
+    def look_for_song_data_in_statuses_to_insert(self, messages):
+        logging.info("Look for song data in mastodon statuses to insert")
+        if messages is None:
+            return
+
+        song_id_counter = len(self.songs_data.index) + 1
+        for message in messages:
+            if "song-data" in message:
+                [title, genre, artist, tempo, duration] = self.extra_song_data_from_status_content(message)
+                if title is not None and self.is_number(tempo) and self.is_number(duration):
+                    logging.info("Insert song from Mastodon: "
+                     + str(song_id_counter) + " "
+                     + str(title) + " "
+                     + str(genre) + " "
+                     + str(artist) + " "
+                     + str(tempo) + " "
+                     + str(duration)
+                    )
+                    self.insert_song_data(song_id_counter, title, genre, artist, int(tempo), int(duration))
+                    song_id_counter = song_id_counter + 1
+
+    def extra_song_data_from_status_content(self, text):
+        # Find the index of "song-data:"
+        model_link_index = text.find("song-data:")
+
+        if model_link_index == -1:
+            return ""
+
+        # Extract the substring after "song-data:"
+        result = text[model_link_index + len("song-data:") + 1:]
+
+        # Find the index of the first whitespace character
+        whitespace_index = result.find("]")
+
+        if whitespace_index != -1:
+            result = result[:whitespace_index + 1]
+            if self.is_json(result):
+                return json.loads(result)
+            else:
+                return [None, None, None, None, None]
+        else:
+            return [None, None, None, None, None]
+
     def save_model(self, model_name, model):
-        """
-        Save the model into the RDF Knowledge Graph by storing its state dictionary.
-        """
         self.insert_model_state(model_name, model.get_state())
+
+    def fetch_all_model_from_knowledge_base(self, link_to_model):
+        return self.retrieve_all_model_states(link_to_model)
 
     def insert_model_state(self, model_name, model_state):
         """
-        Inserts the LLM model parameters into the Fuseki knowledge base using base64 encoding.
+        Inserts the model parameters into the Fuseki knowledge base using base64 encoding.
         """
-        state_dict = {k: v.tolist() for k, v in model_state.items()}  # Serialize tensors to lists
+        # Convert tensors to lists for serialization
+        state_dict = {k: v.tolist() for k, v in model_state.items()}
         state_json = json.dumps(state_dict)
         state_encoded = base64.b64encode(state_json.encode('utf-8')).decode('utf-8')
-
         sparql = SPARQLWrapper(self.update_url)
         sparql_insert_query = f'''
         PREFIX ex: <http://example.org/>
         PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
 
         INSERT DATA {{
-            ex:{model_name} a ex:LLMModel ;
+            ex:{model_name} a ex:ContentBasedModel ;
                             ex:modelState "{state_encoded}" .
         }}
         '''
         sparql.setQuery(sparql_insert_query)
         sparql.setMethod('POST')
         sparql.setReturnFormat(JSON)
-
         try:
             sparql.query()
-            logging.info(f"Model '{model_name}' inserted successfully into the knowledge base.")
+            print(f"Model '{model_name}' inserted successfully.")
         except Exception as e:
-            logging.error(f"Error inserting model: {e}")
-
-    def fetch_all_model_from_knowledge_base(self, link_to_model):
-        return self.retrieve_all_model_states(link_to_model)
+            print(f"Error inserting model: {e}")
 
     def insert_song_data(self, song_id, title, genre, artist, tempo, duration):
         """

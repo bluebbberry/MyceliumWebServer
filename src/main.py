@@ -6,7 +6,7 @@ from rdf_knowledge_graph import RDFKnowledgeGraph
 from mastodon_client import MastodonClient
 import datetime
 import random
-from machine_learning_service import LLMService
+from machine_learning_service import MLService
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -19,11 +19,11 @@ logging.basicConfig(
 
 class MusicRecommendationFungus:
     def __init__(self):
-        logging.info("[INIT] Initializing iFungus instance")
+        logging.info("[INIT] Initializing Music Recommendation instance")
         self.mastodon_client = MastodonClient()
         self.knowledge_graph = RDFKnowledgeGraph(mastodon_client=self.mastodon_client)
         self.knowledge_graph.insert_songs_from_csv('songs.csv')
-        self.machine_learning_service = LLMService(self.knowledge_graph, user_ratings_csv='user_ratings.csv')
+        self.machine_learning_service = MLService(self.knowledge_graph, user_ratings_csv='user_ratings.csv')
         self.knowledge_graph.insert_model_state("my-model", self.machine_learning_service.model.get_state())
         self.feedback_threshold = float(os.getenv("FEEDBACK_THRESHOLD", 0.5))
         logging.info(f"[CONFIG] Feedback threshold set to {self.feedback_threshold}")
@@ -39,6 +39,7 @@ class MusicRecommendationFungus:
                     logging.info("[CHECK] Searching for a new fungus group")
                     messages, random_mycelial_tag = self.mastodon_client.get_statuses_from_random_mycelial_tag()
                     link_to_model = self.knowledge_graph.look_for_new_fungus_group_in_statuses(messages, random_mycelial_tag)
+                    self.knowledge_graph.look_for_song_data_in_statuses_to_insert(messages)
                     self.knowledge_graph.on_found_group_to_join(link_to_model)
                 else:
                     logging.info("[WAIT] No new groups found.")
@@ -92,8 +93,8 @@ class MusicRecommendationFungus:
         fresh_statuses = filter(lambda s: s["id"] not in self.mastodon_client.ids_of_replied_statuses, statuses)
         for status in fresh_statuses:
             if "[FUNGUS]" not in status['content']:
-                answer = self.machine_learning_service.get_answer(status['content'])
-                self.mastodon_client.reply_to_status(status['id'], status['account']['username'], "[FUNGUS] " + str(answer))
+                song_titles = self.machine_learning_service.get_song_recommendations(self.machine_learning_service.extract_song_from_string(status['content']), 3)
+                self.mastodon_client.reply_to_status(status['id'], status['account']['username'], "[FUNGUS] " + str(song_titles))
         # count feedback
         num_of_statuses_send = len(self.mastodon_client.ids_of_replied_statuses)
         overall_favourites = self.mastodon_client.count_likes_of_all_statuses()
@@ -112,6 +113,6 @@ class MusicRecommendationFungus:
             logging.info(f"[EVOLVE] Feedback threshold mutated from {old_threshold} to {self.feedback_threshold}")
 
 if __name__ == "__main__":
-    logging.info("[STARTUP] Launching iFungus instance")
+    logging.info("[STARTUP] Launching MusicRecommendationFungus instance")
     baby_fungus = MusicRecommendationFungus()
     baby_fungus.start()

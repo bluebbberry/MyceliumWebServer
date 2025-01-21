@@ -1,7 +1,7 @@
 import unittest
 import torch
 import pandas as pd
-from machine_learning_service import LLMService
+from machine_learning_service import MLService
 
 class MockRDFKnowledgeGraph:
     def __init__(self):
@@ -17,7 +17,7 @@ class MockRDFKnowledgeGraph:
 class TestMLService(unittest.TestCase):
     def setUp(self):
         self.rdf_knowledge_graph = MockRDFKnowledgeGraph()
-        self.service = LLMService(rdf_knowledge_graph=self.rdf_knowledge_graph)
+        self.service = MLService(rdf_knowledge_graph=self.rdf_knowledge_graph)
 
     def test_preprocess_data(self):
         features_encoded, song_ids = self.service.preprocess_data()
@@ -26,17 +26,21 @@ class TestMLService(unittest.TestCase):
 
     def test_train_model(self):
         self.service.train_model()
-        self.assertIsInstance(self.service.model, LLMService.ContentBasedNeuralNetwork)
+        self.assertIsInstance(self.service.model, MLService.ContentBasedNeuralNetwork)
 
     def test_get_song_recommendations(self):
         self.service.train_model()
-        recommendations = self.service.get_answer('Song A', top_n=2)
+        recommendations = self.service.get_song_recommendations('Song A', top_n=2)
         self.assertEqual(len(recommendations), 2)
         self.assertTrue(all(isinstance(song, str) for song in recommendations))
 
     def test_recommend_songs_for_user_no_data(self):
         with self.assertRaises(ValueError):
-            self.service.get_answer(user_id=1)
+            self.service.recommend_songs_for_user(user_id=1)
+
+    def test_extract_song_from_string(self):
+        result = self.service.extract_song_from_string("I love Song A!")
+        self.assertEqual(result, "Song A")
 
 if __name__ == '__main__':
     unittest.main()
