@@ -1,4 +1,6 @@
 # main.yp
+import json
+import threading
 import time
 import logging
 import os
@@ -8,6 +10,7 @@ import datetime
 import random
 from machine_learning_service import MLService
 from dotenv import load_dotenv
+from flask import Flask, request, jsonify
 
 load_dotenv()
 
@@ -16,6 +19,9 @@ logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s - %(levelname)s - %(message)s"
 )
+
+# Flask app setup
+app = Flask(__name__)
 
 class MusicRecommendationFungus:
     def __init__(self):
@@ -112,7 +118,31 @@ class MusicRecommendationFungus:
             self.feedback_threshold *= random.uniform(0.9, 1.1)  # Randomly adjust threshold
             logging.info(f"[EVOLVE] Feedback threshold mutated from {old_threshold} to {self.feedback_threshold}")
 
+    def get_song_recommendations(self, song_name):
+        recommendations = self.machine_learning_service.get_song_recommendations(song_name, 3)
+        if isinstance(recommendations, (list, tuple)):
+            recommendations = [rec.tolist() if hasattr(rec, 'tolist') else rec for rec in recommendations]
+        return recommendations
+
+
+logging.info("[STARTUP] Launching MusicRecommendationFungus instance")
+music_service = MusicRecommendationFungus()
+
+
+@app.route('/recommend', methods=['GET'])
+def recommend():
+    """Endpoint to get song recommendations."""
+    song_name = request.args.get('song_name')
+    if not song_name:
+        return jsonify({"error": "Missing 'song_name' parameter"}), 400
+
+    logging.info(f"[REQUEST] Received recommendation request for song: {song_name}")
+    recommendations = music_service.get_song_recommendations(song_name)
+    return jsonify({"song_name": song_name, "recommendations": recommendations[0]})
+
+
 if __name__ == "__main__":
-    logging.info("[STARTUP] Launching MusicRecommendationFungus instance")
-    baby_fungus = MusicRecommendationFungus()
-    baby_fungus.start()
+    port = int(os.getenv("PORT", 5000))
+    logging.info("[STARTUP] Launching Flask app for Music Recommendation Service on port " + str(port))
+    threading.Thread(target=lambda: app.run(host="0.0.0.0", port=int(port), debug=True, use_reloader=False)).start()
+    music_service.start()
