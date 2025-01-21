@@ -1,10 +1,18 @@
 # MyceliumWebServer
 
-Chatbots like ChatGPT lie on a centralized server. A federated AI chat bot distributes the learning on multiple PCs. The mycelium goes a step further: here, AI models can freely travel across the web as agents.
+Chatbots like ChatGPT lie on a centralized server. A federated AI chat bot distributes the learning on multiple PCs, but models are still inside silos. The mycelium goes a step further: here, AI models can freely travel across the web as agents.
 
-This project realizes community-driven song-recommendation in a decentralized manner based on RDF Knowledge-Graph, Mastodon and decentralized federated learning. The idea: train a model on your local machine while collaborating with your friends and then use the model together through bots.
+It is realized by adding another protocol layer on top of that of federated AI:
 
-For background-information about the project's mission statement, see the [Wiki](https://github.com/bluebbberry/MusicRecommendationFungus/wiki).
+![mycelium_web.png](mycelium_web.png)
+
+More concretely, it realizes the mycelium layer with a protocol that makes use of JavaScript/Python, a communication protocol like AcitivtyPub and evolutionary algorithms.
+The concrete implemenation of this is described in the so-called SPORE-protocol.
+Based on that, it builds on top of federated, peer-to-peer AI training, e.g. flower.ai and knowledge graphs, which are used to link to other learning groups.
+
+![mycelium_web2.png](mycelium_web2.png)
+
+For more background-information about the project's mission statement, see the [Wiki](https://github.com/bluebbberry/MusicRecommendationFungus/wiki).
 
 ## Requirements
 
