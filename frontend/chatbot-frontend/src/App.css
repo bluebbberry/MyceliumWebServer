@@ -25,7 +25,6 @@
 }
 
 .message {
-  background-color: #f1f1f1;
   padding: 10px;
   margin: 5px 0;
   border-radius: 5px;
@@ -56,4 +55,16 @@
 
 .send-button:hover {
   background-color: #45a049;
+}
+
+.message.user {
+  background-color: #d1e7dd;
+  text-align: right;
+  align-self: flex-end;
+}
+
+.message.bot {
+  background-color: #f8d7da;
+  text-align: left;
+  align-self: flex-start;
 }

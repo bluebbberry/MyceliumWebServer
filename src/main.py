@@ -11,6 +11,7 @@ import random
 from machine_learning_service import MLService
 from dotenv import load_dotenv
 from flask import Flask, request, jsonify
+from flask_cors import CORS
 
 load_dotenv()
 
@@ -22,6 +23,7 @@ logging.basicConfig(
 
 # Flask app setup
 app = Flask(__name__)
+CORS(app)
 
 class MusicRecommendationFungus:
     def __init__(self):
