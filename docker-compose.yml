@@ -1,8 +1,10 @@
 services:
   fungi:
     build: .
+    restart: always
   fuseki:
     image: "stain/jena-fuseki"
+    restart: always
     ports:
       - 3030:3030
     environment:
