@@ -34,6 +34,8 @@ class MusicRecommendationFungus:
         self.machine_learning_service = MLService(self.knowledge_graph, user_ratings_csv='user_ratings.csv')
         self.knowledge_graph.insert_model_state("my-model", self.machine_learning_service.model.get_state())
         self.feedback_threshold = float(os.getenv("FEEDBACK_THRESHOLD", 0.5))
+        # default sleep time: 42300
+        self.sleep_time = float(os.getenv("SLEEP_TIME", 42300))
         logging.info(f"[CONFIG] Feedback threshold set to {self.feedback_threshold}")
 
     def start(self):
@@ -70,12 +72,12 @@ class MusicRecommendationFungus:
 
                 self.evolve_behavior(feedback)
 
-                logging.info("[SLEEP] Sleeping for 20 seconds")
-                time.sleep(20)
+                logging.info("[SLEEP] Sleeping for " + str(self.sleep_time))
+                time.sleep(self.sleep_time)
                 i = i + 1
             except Exception as e:
                 logging.error(f"[ERROR] An error occurred: {e}", exc_info=True)
-                time.sleep(60)
+                time.sleep(self.sleep_time)
 
     def train_model(self):
         try:
