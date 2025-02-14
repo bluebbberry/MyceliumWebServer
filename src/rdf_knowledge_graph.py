@@ -110,6 +110,8 @@ class RDFKnowledgeGraph:
         sparql.setQuery(sparql_insert_query)
         sparql.setMethod('POST')
         sparql.setReturnFormat(JSON)
+        sparql.setHTTPAuth('BASIC')
+        sparql.setCredentials("admin", "pw123")
         try:
             sparql.query()
             print(f"Model '{model_name}' inserted successfully.")
@@ -140,6 +142,8 @@ class RDFKnowledgeGraph:
         sparql.setQuery(sparql_insert_query)
         sparql.setMethod('POST')
         sparql.setReturnFormat(JSON)
+        sparql.setHTTPAuth('BASIC')
+        sparql.setCredentials("admin", "pw123")
 
         try:
             sparql.query()
@@ -170,6 +174,8 @@ class RDFKnowledgeGraph:
 
         sparql.setQuery(sparql_select_query)
         sparql.setReturnFormat(JSON)
+        sparql.setHTTPAuth('BASIC')
+        sparql.setCredentials("admin", "pw123")
 
         try:
             results = sparql.query().convert()
@@ -215,6 +221,8 @@ class RDFKnowledgeGraph:
         '''
         sparql.setQuery(sparql_select_query)
         sparql.setReturnFormat(JSON)
+        sparql.setHTTPAuth('BASIC')
+        sparql.setCredentials("admin", "pw123")
         try:
             results = sparql.query().convert()
             models = []
