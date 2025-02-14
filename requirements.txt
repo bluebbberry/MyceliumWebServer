@@ -1,4 +1,10 @@
 numpy==1.23.4
 requests==2.28.1
 rdflib==6.2.0
-python_dotenv
+python-dotenv
+torchvision
+SPARQLWrapper
+pandas
+flask_cors
+flask
+scikit-learn
