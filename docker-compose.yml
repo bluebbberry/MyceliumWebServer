@@ -3,6 +3,9 @@ services:
     build: .
     restart: always
     depends_on: [ fuseki ]
+  fungi-frontend:
+    build: ./frontend
+    restart: always
   fuseki:
     image: "stain/jena-fuseki"
     restart: always
