@@ -12,7 +12,7 @@ const Chatbot = () => {
     setMessages((prevMessages) => [...prevMessages, userMessage]);
 
     try {
-      const response = await axios.post('http://localhost:5000/chat', { message: text });
+      const response = await axios.post('http://127.0.0.1:5000/chat', { message: text });
       const botMessage = { text: response.data.reply, sender: 'bot' };
       setMessages((prevMessages) => [...prevMessages, botMessage]);
     } catch (error) {

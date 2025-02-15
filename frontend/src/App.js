@@ -15,7 +15,7 @@ function App() {
 
       try {
         // Send a GET request to the backend for recommendations
-        const response = await axios.get('http://localhost:5000/recommend', {
+        const response = await axios.get('http://127.0.0.1:5000/recommend', {
           params: { song_name: newMessage },
         });
 

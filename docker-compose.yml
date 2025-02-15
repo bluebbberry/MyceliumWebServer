@@ -2,11 +2,13 @@ services:
   fungi:
     build: .
     restart: always
+    ports:
+      - 5000:5000
     depends_on: [ fuseki ]
   fungi-frontend:
     build: ./frontend
     ports:
-      - "3000:3000"
+      - 3000:3000
     restart: always
   fuseki:
     image: "stain/jena-fuseki"
