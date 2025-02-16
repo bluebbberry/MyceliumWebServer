@@ -6,6 +6,17 @@ function App() {
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState('');
   const [otherBots, setOtherBots] = useState([]);
+  const [fungusName, setFungusName] = useState('');
+
+  // List of creative fungus-themed names
+  const fungusTerms = ['Shroom', 'Fungal', 'Mushroom', 'Spore', 'Truffle', 'Cap', 'Toadstool', 'Enoki', 'Chanterelle', 'Mycelium'];
+  const creativeSuffixes = ['Sage', 'Oracle', 'Muse', 'Whisperer', 'Teller', 'Connoisseur', 'Seer', 'Enchanter', 'Charmer', 'Mystic'];
+
+  useEffect(() => {
+    const randomFungusTerm = fungusTerms[Math.floor(Math.random() * fungusTerms.length)];
+    const randomSuffix = creativeSuffixes[Math.floor(Math.random() * creativeSuffixes.length)];
+    setFungusName(`${randomFungusTerm} ${randomSuffix}`);
+  }, []);
 
   // Function to send a message and fetch recommendations
   const handleSendMessage = async () => {
@@ -77,7 +88,8 @@ function App() {
     <div className="chat-container">
       <div className="chat-box">
         <div className="chat-title">
-          <h1>Music Recommendation Bot</h1>
+          <h1>{fungusName}</h1>
+          <h2>Music Recommendation Fungus</h2>
           <div>Related bots:</div>
           <div className="bots-list">
             {otherBots.map((bot, index) => (
