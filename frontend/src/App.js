@@ -5,6 +5,7 @@ import './App.css';
 function App() {
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState('');
+  const [otherBots, setOtherBots] = useState([]);
 
   // Function to send a message and fetch recommendations
   const handleSendMessage = async () => {
@@ -45,6 +46,26 @@ function App() {
     }
   };
 
+  // Load other bots configuration from backend
+  useEffect(() => {
+    const loadOtherBots = async () => {
+      try {
+        const backendPort = process.env.REACT_APP_BACKEND_PORT;
+        const response = await axios.get(`http://127.0.0.1:${backendPort}/bots`);
+        setOtherBots(response.data.bots);
+      } catch (error) {
+        console.error('Error loading other bots:', error);
+        // Default to original hardcoded values if API fails
+        setOtherBots([
+          { name: 'Fungi 1', url: 'http://localhost:3000' },
+          { name: 'Fungi 2', url: 'http://localhost:3001' }
+        ]);
+      }
+    };
+
+    loadOtherBots();
+  }, []);
+
   // Handle Enter key press to send a message
   const handleKeyPress = (e) => {
     if (e.key === 'Enter') {
@@ -59,8 +80,12 @@ function App() {
           <h1>Music Recommendation Bot</h1>
           <div>
             <p>Other bots:</p>
-            <a href="http://localhost:3000">Fungi 1</a>
-            &nbsp;<a href="http://localhost:3001">Fungi 2</a>
+            {otherBots.map((bot, index) => (
+              <span key={index}>
+                <a href={bot.url}>{bot.name}</a>
+                {index < otherBots.length - 1 && '\u00A0'}
+              </span>
+            ))}
           </div>
         </div>
 

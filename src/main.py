@@ -144,6 +144,15 @@ def recommend():
     recommendations = music_service.get_song_recommendations(song_name)
     return jsonify({"song_name": song_name, "recommendations": recommendations[0]})
 
+@app.route('/bots', methods=['GET'])
+def get_bots():
+    """ Endpoint for bots configuration """
+    bots = [
+        {"name": "Fungi 1", "url": "http://localhost:3000"},
+        {"name": "Fungi 2", "url": "http://localhost:3001"}
+    ]
+    return jsonify({"bots": bots})
+
 
 if __name__ == "__main__":
     port = int(os.getenv("PORT", 5000))
