@@ -57,6 +57,11 @@ function App() {
       <div className="chat-box">
         <div className="chat-title">
           <h1>Music Recommendation Bot</h1>
+          <div>
+            <p>Other bots:</p>
+            <a href="http://localhost:3000">Fungi 1</a>
+            &nbsp;<a href="http://localhost:3001">Fungi 2</a>
+          </div>
         </div>
 
         {/* Chat Messages */}

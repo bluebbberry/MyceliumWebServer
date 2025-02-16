@@ -29,10 +29,6 @@ const Chatbot = () => {
       <MessageList messages={messages} />
       <MessageInput onSend={sendMessage} />
     </div>
-    <div>
-        <a href="localhost:3000">Fungi 1</a>
-        <a href="localhost:3001">Fungi 2</a>
-    </div>
   );
 };
 
