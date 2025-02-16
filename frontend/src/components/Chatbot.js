@@ -12,7 +12,8 @@ const Chatbot = () => {
     setMessages((prevMessages) => [...prevMessages, userMessage]);
 
     try {
-      const response = await axios.post('http://127.0.0.1:5000/chat', { message: text });
+      const backendPort = process.env.BACKEND_PORT
+      const response = await axios.post('http://127.0.0.1:' + backendPort + '/chat', { message: text });
       const botMessage = { text: response.data.reply, sender: 'bot' };
       setMessages((prevMessages) => [...prevMessages, botMessage]);
     } catch (error) {
@@ -26,6 +27,10 @@ const Chatbot = () => {
     <div className="chatbot">
       <MessageList messages={messages} />
       <MessageInput onSend={sendMessage} />
+    </div>
+    <div>
+        <a href="localhost:3000">Fungi 1</a>
+        <a href="localhost:3001">Fungi 2</a>
     </div>
   );
 };
