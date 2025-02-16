@@ -57,8 +57,8 @@ function App() {
         console.error('Error loading other bots:', error);
         // Default to original hardcoded values if API fails
         setOtherBots([
-          { name: 'Fungi 1', url: 'http://localhost:3000' },
-          { name: 'Fungi 2', url: 'http://localhost:3001' }
+          { name: 'Fungi 1', port: '3000' },
+          { name: 'Fungi 2', port: '3001' }
         ]);
       }
     };
@@ -83,7 +83,7 @@ function App() {
             {otherBots.map((bot, index) => (
               <div key={index} className="bot-card">
                 <div className="bot-avatar">{bot.name[0]}</div>
-                <a href='http://localhost:'{bot.port}>{bot.name}</a>
+                <a href={`http://localhost:${bot.port}`}>{bot.name}</a>
               </div>
             ))}
           </div>
