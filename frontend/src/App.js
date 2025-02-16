@@ -83,7 +83,7 @@ function App() {
             {otherBots.map((bot, index) => (
               <div key={index} className="bot-card">
                 <div className="bot-avatar">{bot.name[0]}</div>
-                <a href={bot.url}>{bot.name}</a>
+                <a href='http://localhost:'{bot.port}>{bot.name}</a>
               </div>
             ))}
           </div>

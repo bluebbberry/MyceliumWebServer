@@ -34,7 +34,7 @@ class MusicRecommendationFungus:
         self.machine_learning_service = MLService(self.knowledge_graph, user_ratings_csv='user_ratings.csv')
         self.knowledge_graph.insert_model_state("my-model", self.machine_learning_service.model.get_state())
         self.feedback_threshold = float(os.getenv("FEEDBACK_THRESHOLD", 0.5))
-        self.knowledge_graph.insert_or_update_fungus_link(3, "http://localhost:3000")
+        self.knowledge_graph.insert_fungus_data(3, os.getenv("FRONTEND_PORT", 3000))
         # default sleep time: 42300
         self.sleep_time = float(os.getenv("SLEEP_TIME", 42300))
         logging.info(f"[CONFIG] Feedback threshold set to {self.feedback_threshold}")
@@ -148,17 +148,18 @@ def recommend():
 @app.route('/bots', methods=['GET'])
 def get_bots():
     """ Endpoint for bots configuration """
-    fungi_data = music_service.knowledge_graph.get_all_fungus_data()
-    if fungi_data["link_to_fungus"] is not None:
+    all_fungi_data = music_service.knowledge_graph.get_all_fungi_data()
+    if len(all_fungi_data) > 0:
+        logging.info("Retrieved all fungus links from knowledge base")
         bots = [
-            {"name": "Fungi 1", "url": fungi_data["link_to_fungus"]},
-            {"name": "Fungi 2", "url": fungi_data["link_to_fungus"]}
+            {"name": f"Fungi {i + 1}", "port": fungus_data["link_to_model"]}
+            for i, fungus_data in enumerate(all_fungi_data)
         ]
     else:
         logging.error("Unable to retrieve fungus data from knowledge base - use default values")
         bots = [
-            {"name": "Fungi 1", "url": "http://localhost:3000"},
-            {"name": "Fungi 2", "url": "http://localhost:3001"}
+            {"name": "Fungi 1", "port": "3000"},
+            {"name": "Fungi 2", "port": "3001"}
         ]
     return jsonify({"bots": bots})
 
