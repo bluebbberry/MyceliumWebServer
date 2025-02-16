@@ -28,6 +28,7 @@ services:
     restart: always
     environment:
       - PORT=3000
+    depends_on: [ fungi ]
   fungi-frontend2:
     build:
       context: ./frontend
@@ -38,6 +39,7 @@ services:
     restart: always
     environment:
       - PORT=3001
+    depends_on: [ fungi2 ]
 
   fuseki:
     image: "stain/jena-fuseki"

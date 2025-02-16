@@ -8,14 +8,19 @@ function App() {
   const [otherBots, setOtherBots] = useState([]);
   const [fungusName, setFungusName] = useState('');
 
-  // List of creative fungus-themed names
-  const fungusTerms = ['Shroom', 'Fungal', 'Mushroom', 'Spore', 'Truffle', 'Cap', 'Toadstool', 'Enoki', 'Chanterelle', 'Mycelium'];
-  const creativeSuffixes = ['Sage', 'Oracle', 'Muse', 'Whisperer', 'Teller', 'Connoisseur', 'Seer', 'Enchanter', 'Charmer', 'Mystic'];
-
+  // Generate a random fungus-themed name on component mount
   useEffect(() => {
-    const randomFungusTerm = fungusTerms[Math.floor(Math.random() * fungusTerms.length)];
-    const randomSuffix = creativeSuffixes[Math.floor(Math.random() * creativeSuffixes.length)];
-    setFungusName(`${randomFungusTerm} ${randomSuffix}`);
+    const fetchFungusName = async () => {
+      try {
+        const backendPort = process.env.REACT_APP_BACKEND_PORT;
+        const response = await axios.get(`http://127.0.0.1:${backendPort}/info`);
+        setFungusName(response.data.info.name);
+      } catch (error) {
+        console.error('Error fetching fungus name:', error);
+        setFungusName('Mystery Mushroom'); // Fallback name
+      }
+    };
+    fetchFungusName();
   }, []);
 
   // Function to send a message and fetch recommendations

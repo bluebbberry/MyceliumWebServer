@@ -35,9 +35,20 @@ class MusicRecommendationFungus:
         self.knowledge_graph.insert_model_state("my-model", self.machine_learning_service.model.get_state())
         self.feedback_threshold = float(os.getenv("FEEDBACK_THRESHOLD", 0.5))
         self.knowledge_graph.insert_fungus_data(3, os.getenv("FRONTEND_PORT", 3000))
+        self.fungus_name = self.generate_fungus_name()
         # default sleep time: 42300
         self.sleep_time = float(os.getenv("SLEEP_TIME", 42300))
         logging.info(f"[CONFIG] Feedback threshold set to {self.feedback_threshold}")
+
+    def generate_fungus_name(self):
+        fungus_prefixes = [
+            "Shroom", "Toadstool", "Spore", "Mycelium", "Cap", "Gilly", "Truffle", "Fungi", "Mush", "Puff"
+        ]
+        fungus_suffixes = ['Sage', 'Oracle', 'Muse', 'Whisperer', 'Teller', 'Connoisseur', 'Seer', 'Enchanter', 'Charmer', 'Mystic'];
+        prefix = random.choice(fungus_prefixes)
+        suffix = random.choice(fungus_suffixes)
+        fungus_name = f"{prefix} {suffix}"
+        return fungus_name
 
     def start(self):
         switch_team = True
@@ -162,6 +173,13 @@ def get_bots():
             {"name": "Fungi 2", "port": "3001"}
         ]
     return jsonify({"bots": bots})
+
+@app.route('/info', methods=['GET'])
+def get_info():
+    info = {
+        "name": music_service.fungus_name
+    }
+    return jsonify({"info": info})
 
 
 if __name__ == "__main__":
