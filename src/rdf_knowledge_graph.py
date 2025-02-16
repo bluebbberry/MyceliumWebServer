@@ -151,6 +151,80 @@ class RDFKnowledgeGraph:
         except Exception as e:
             print(f"Error inserting song: {e}")
 
+    def insert_or_update_fungus_link(self, fungus_id, link_to_fungus):
+        """
+        Inserts the individual song data into the Fuseki knowledge base.
+        """
+        # Prepare the SPARQL query to insert the song data
+        sparql = SPARQLWrapper(self.update_url)
+        sparql_insert_query = f'''
+        PREFIX ex: <http://example.org/>
+        PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+
+        INSERT DATA {{
+            ex:fungus_{fungus_id} a ex:Fungus ;
+                               ex:fungus_id {fungus_id} ;
+                               ex:link_to_fungus "{link_to_fungus}" .
+        }}
+        '''
+
+        sparql.setQuery(sparql_insert_query)
+        sparql.setMethod('POST')
+        sparql.setReturnFormat(JSON)
+        sparql.setHTTPAuth('BASIC')
+        sparql.setCredentials("admin", "pw123")
+
+        try:
+            sparql.query()
+            print(f"Link to fungus inserted successfully.")
+        except Exception as e:
+            print(f"Error inserting song: {e}")
+
+    def get_all_fungus_data(self):
+        """
+        Retrieves all fungi and their data from the Fuseki knowledge base.
+        """
+        # Prepare the SPARQL query to retrieve all song data
+        sparql = SPARQLWrapper(self.fuseki_url)
+        sparql_select_query = '''
+        PREFIX ex: <http://example.org/>
+        PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+
+        SELECT ?fungus_id ?link_to_fungus WHERE {
+            ?fungus a ex:Fungus ;
+                  ex:fungus_id ?fungus_id ;
+                  ex:link_to_fungus ?link_to_fungus .
+        }
+        '''
+
+        sparql.setQuery(sparql_select_query)
+        sparql.setReturnFormat(JSON)
+        sparql.setHTTPAuth('BASIC')
+        sparql.setCredentials("admin", "pw123")
+
+        try:
+            results = sparql.query().convert()
+
+            # Process the result
+            fungi = []
+            for fungus_data in results["results"]["bindings"]:
+                fungus_info = {
+                    "fungus_id": fungus_data["fungus_id"]["value"],
+                    "link_to_fungus": fungus_data["link_to_fungus"]["value"]
+                }
+                fungi.append(fungus_info)
+
+            # Convert the list of dictionaries into a pandas DataFrame
+            if fungi:
+                fungus_df = pd.DataFrame(fungi)
+                return fungus_df
+            else:
+                print("No fungus found in the database.")
+                return pd.DataFrame()  # Return an empty DataFrame if no data is found
+        except Exception as e:
+            print(f"Error retrieving fungus data: {e}")
+            return []
+
     def get_all_songs(self):
         """
         Retrieves all songs and their data from the Fuseki knowledge base.
