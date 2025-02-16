@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import './App.css';
 
@@ -78,13 +78,13 @@ function App() {
       <div className="chat-box">
         <div className="chat-title">
           <h1>Music Recommendation Bot</h1>
-          <div>
-            <p>Other bots:</p>
+          <div>Related bots:</div>
+          <div className="bots-list">
             {otherBots.map((bot, index) => (
-              <span key={index}>
+              <div key={index} className="bot-card">
+                <div className="bot-avatar">{bot.name[0]}</div>
                 <a href={bot.url}>{bot.name}</a>
-                {index < otherBots.length - 1 && '\u00A0'}
-              </span>
+              </div>
             ))}
           </div>
         </div>
