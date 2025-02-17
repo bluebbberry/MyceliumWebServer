@@ -162,17 +162,17 @@ def get_bots():
     all_fungi_data = music_service.knowledge_graph.get_all_fungi_data()
     if len(all_fungi_data) > 0:
         logging.info("Retrieved all fungus links from knowledge base")
-        bots = [
+        all_fungi = [
             {"name": f"Fungi {i + 1}", "port": fungus_data["link_to_model"]}
             for i, fungus_data in enumerate(all_fungi_data)
         ]
     else:
         logging.error("Unable to retrieve fungus data from knowledge base - use default values")
-        bots = [
+        all_fungi = [
             {"name": "Fungi 1", "port": "3000"},
             {"name": "Fungi 2", "port": "3001"}
         ]
-    return jsonify( { "bots": bots, "models": { "model 1": ["Fungi 1", "Fungi 2"], "model 2": ["Fungi 1", "Fungi 2"] }})
+    return jsonify( { "allFungi": all_fungi, "model": { "name": "MyModel", "fungi": [ all_fungi[0]["name"] ]}} )
 
 @app.route('/info', methods=['GET'])
 def get_info():

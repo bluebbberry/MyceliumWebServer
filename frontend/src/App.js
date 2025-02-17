@@ -5,12 +5,11 @@ import './App.css';
 function App() {
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState('');
-  const [otherBots, setOtherBots] = useState([]);
   const [fungusName, setFungusName] = useState('');
-  const [models, setModels] = useState({});
-  const [isModelExpanded, setIsModelExpanded] = useState(false);
+  const [modelInfo, setModelInfo] = useState(null);  // Model info (name and fungi that train it)
+  const [allFungi, setAllFungi] = useState([]);     // All fungi known to the fungus
 
-  // Generate a random fungus-themed name on component mount
+  // Fetch fungus name on component mount
   useEffect(() => {
     const fetchFungusName = async () => {
       try {
@@ -23,6 +22,24 @@ function App() {
       }
     };
     fetchFungusName();
+  }, []);
+
+  // Fetch model fungi and all fungi (from earlier trainings)
+  useEffect(() => {
+    const loadFungiData = async () => {
+      try {
+        const backendPort = process.env.REACT_APP_BACKEND_PORT;
+        const response = await axios.get(`http://127.0.0.1:${backendPort}/fungi`);
+        setModelInfo(response.data.model || null);  // Model info (name and fungi that train it)
+        setAllFungi(response.data.allFungi || []);  // All fungi known to the fungus
+      } catch (error) {
+        console.error('Error loading fungi data:', error);
+        setModelInfo(null);
+        setAllFungi([]);
+      }
+    };
+
+    loadFungiData();
   }, []);
 
   // Function to send a message and fetch recommendations
@@ -63,28 +80,6 @@ function App() {
     }
   };
 
-  // Load other bots configuration from backend
-  useEffect(() => {
-    const loadOtherBots = async () => {
-      try {
-        const backendPort = process.env.REACT_APP_BACKEND_PORT;
-        const response = await axios.get(`http://127.0.0.1:${backendPort}/bots`);
-        setOtherBots(response.data.bots);
-        setModels(response.data.models || {});
-      } catch (error) {
-        console.error('Error loading other bots:', error);
-        // Default to original hardcoded values if API fails
-        setOtherBots([
-          { name: 'Fungi 1', port: '3000' },
-          { name: 'Fungi 2', port: '3001' }
-        ]);
-        setModels({});
-      }
-    };
-
-    loadOtherBots();
-  }, []);
-
   // Handle Enter key press to send a message
   const handleKeyPress = (e) => {
     if (e.key === 'Enter') {
@@ -93,74 +88,78 @@ function App() {
   };
 
   return (
-    <div className="chat-container">
+    <div className="fungus-container">
       <div className="chat-box">
+        {/* Chat Section */}
         <div className="chat-title">
           <h1>{fungusName}</h1>
           <h2>Music Recommendation Fungus</h2>
 
-          {/* Related Bots Section */}
-          <div>Related bots:</div>
-          <div className="bots-list">
-            {otherBots.map((bot, index) => (
-              <div key={index} className="bot-card">
-                <div className="bot-avatar">{bot.name[0]}</div>
-                <a href={`http://localhost:${bot.port}`}>{bot.name}</a>
+          {/* Chat Messages */}
+          <div className="messages">
+            {messages.map((message, index) => (
+              <div
+                key={index}
+                className={`message ${message.sender === 'user' ? 'user' : 'bot'}`}
+              >
+                {message.text}
               </div>
             ))}
           </div>
 
-          {/* Model Bots Section */}
-          <div className="model-section">
-            <button
-              className="toggle-button"
-              onClick={() => setIsModelExpanded(!isModelExpanded)}
-            >
-              {isModelExpanded ? 'Hide' : 'Show'} bots that train this model
+          {/* Input Field */}
+          <div className="input-container">
+            <input
+              type="text"
+              className="message-input"
+              value={newMessage}
+              onChange={(e) => setNewMessage(e.target.value)}
+              onKeyPress={handleKeyPress}
+              placeholder="Type a song name..."
+            />
+            <button className="send-button" onClick={handleSendMessage}>
+              Send
             </button>
-            {isModelExpanded && (
-              <div className="model-list">
-                {Object.keys(models).map((modelName, index) => (
-                  <div key={index} className="model-card">
-                    <h3>{modelName}</h3>
-                    {models[modelName].map((fungus, idx) => (
-                      <div key={idx} className="bot-card">
-                        <div className="bot-avatar">{fungus[0]}</div>
-                        <span>{fungus}</span>
-                      </div>
-                    ))}
-                  </div>
-                ))}
-              </div>
-            )}
           </div>
         </div>
 
-        {/* Chat Messages */}
-        <div className="messages">
-          {messages.map((message, index) => (
-            <div
-              key={index}
-              className={`message ${message.sender === 'user' ? 'user' : 'bot'}`}
-            >
-              {message.text}
+        {/* Fungi Sections */}
+        <div className="fungus-section">
+          {/* Model Fungi Section (First Line) */}
+          {modelInfo && (
+            <div className="model-line">
+              <h3>Model: {modelInfo.name}</h3>
+              <div className="fungus-list">
+                {modelInfo.fungi.map((fungus, index) => (
+                  <div key={index} className="fungus-card">
+                    <div className="fungus-name">{fungus}</div>
+                    {allFungi
+                      .filter((f) => f.name === fungus)
+                      .map((fungusData, idx) => (
+                        <a key={idx} href={`http://localhost:${fungusData.port}`} target="_blank" rel="noopener noreferrer">
+                          Visit
+                        </a>
+                      ))}
+                  </div>
+                ))}
+              </div>
             </div>
-          ))}
-        </div>
+          )}
 
-        {/* Input Field */}
-        <div className="input-container">
-          <input
-            type="text"
-            className="message-input"
-            value={newMessage}
-            onChange={(e) => setNewMessage(e.target.value)}
-            onKeyPress={handleKeyPress}
-            placeholder="Type a song name..."
-          />
-          <button className="send-button" onClick={handleSendMessage}>
-            Send
-          </button>
+          {/* Other Fungi Section (Second Line) */}
+          <div className="other-fungi-line">
+            <h3>Other Fungi Your Fungus Knows About</h3>
+            <div className="fungus-list">
+              {allFungi.map((fungus, index) => (
+                <div key={index} className="fungus-card">
+                  <div className="fungus-name">{fungus.name}</div>
+                  <a href={`http://localhost:${fungus.port}`} target="_blank" rel="noopener noreferrer">
+                    Visit
+                  </a>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
       </div>
     </div>
