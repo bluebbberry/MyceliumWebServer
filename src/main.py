@@ -44,7 +44,7 @@ class MusicRecommendationFungus:
         fungus_prefixes = [
             "Shroom", "Toadstool", "Spore", "Mycelium", "Cap", "Gilly", "Truffle", "Fungi", "Mush", "Puff"
         ]
-        fungus_suffixes = [ 'Sage', 'Oracle', 'Muse', 'Whisperer', 'Teller', 'Connoisseur', 'Seer', 'Enchanter', 'Charmer', 'Mystic' ]
+        fungus_suffixes = [ 'Sage', 'Oracle', 'Whisperer', 'Teller', 'Connoisseur', 'Seer', 'Enchanter', 'Charmer', 'Mystic' ]
         prefix = random.choice(fungus_prefixes)
         suffix = random.choice(fungus_suffixes)
         fungus_name = f"{prefix} {suffix}"
@@ -146,7 +146,7 @@ music_service = MusicRecommendationFungus()
 
 
 @app.route('/recommend', methods=['GET'])
-def recommend():
+def get_recommendation():
     """Endpoint to get song recommendations."""
     song_name = request.args.get('song_name')
     if not song_name:
@@ -157,7 +157,7 @@ def recommend():
     return jsonify({"song_name": song_name, "recommendations": recommendations[0]})
 
 @app.route('/fungi', methods=['GET'])
-def get_fungi():
+def get_fungi_data():
     """ Endpoint for bots configuration """
     all_fungi_data = music_service.knowledge_graph.get_all_fungi_data()
     if len(all_fungi_data) > 0:
@@ -175,7 +175,7 @@ def get_fungi():
     return jsonify( { "allFungi": all_fungi, "model": { "name": "MyModel", "fungi": [ all_fungi[0]["name"] ]}} )
 
 @app.route('/info', methods=['GET'])
-def get_info():
+def get_fungus_info():
     info = {
         "name": music_service.fungus_name
     }

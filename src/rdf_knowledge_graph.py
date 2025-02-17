@@ -217,7 +217,7 @@ class RDFKnowledgeGraph:
         INSERT DATA {{
             ex:fungus_{fungus_id} a ex:Fungus ;
                                ex:fungusId {fungus_id} ;
-                               ex:fungusName {fungus_name} ;
+                               ex:fungusName "{fungus_name}" ;
                                ex:linkToModel "{link_to_model}" .
         }}
         '''
@@ -244,7 +244,7 @@ class RDFKnowledgeGraph:
                 PREFIX ex: <http://example.org/>
                 PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
 
-                SELECT ?fungus_id ?link_to_model WHERE {
+                SELECT ?fungus_id ?link_to_model ?fungus_name WHERE {
                     ?fungus a ex:Fungus ;
                             ex:fungusId ?fungus_id ;
                             ex:fungusName ?fungus_name ;
@@ -265,7 +265,8 @@ class RDFKnowledgeGraph:
             for fungus_data in results["results"]["bindings"]:
                 fungus_info = {
                     "fungus_id": fungus_data["fungus_id"]["value"],
-                    "link_to_model": fungus_data["link_to_model"]["value"]
+                    "link_to_model": fungus_data["link_to_model"]["value"],
+                    "fungus_name": fungus_data["fungus_name"]["value"]
                 }
                 fungi.append(fungus_info)
 
