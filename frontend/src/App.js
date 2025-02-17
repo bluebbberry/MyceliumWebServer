@@ -59,7 +59,7 @@ function App() {
         const recommendations = response.data.recommendations || [];
         const botMessage = {
           sender: 'bot',
-          text: `Recommendations for "${newMessage}": ${recommendations.join(', ')}`,
+          text: `Recommendations for "${newMessage}": ${recommendations}`,
         };
 
         // Add the bot response to the chat
