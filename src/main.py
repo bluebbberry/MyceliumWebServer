@@ -44,7 +44,7 @@ class MusicRecommendationFungus:
         fungus_prefixes = [
             "Shroom", "Toadstool", "Spore", "Mycelium", "Cap", "Gilly", "Truffle", "Fungi", "Mush", "Puff"
         ]
-        fungus_suffixes = ['Sage', 'Oracle', 'Muse', 'Whisperer', 'Teller', 'Connoisseur', 'Seer', 'Enchanter', 'Charmer', 'Mystic'];
+        fungus_suffixes = [ 'Sage', 'Oracle', 'Muse', 'Whisperer', 'Teller', 'Connoisseur', 'Seer', 'Enchanter', 'Charmer', 'Mystic' ]
         prefix = random.choice(fungus_prefixes)
         suffix = random.choice(fungus_suffixes)
         fungus_name = f"{prefix} {suffix}"
@@ -172,7 +172,7 @@ def get_bots():
             {"name": "Fungi 1", "port": "3000"},
             {"name": "Fungi 2", "port": "3001"}
         ]
-    return jsonify({"bots": bots})
+    return jsonify( { "bots": bots, "models": { "model 1": ["Fungi 1", "Fungi 2"], "model 2": ["Fungi 1", "Fungi 2"] }})
 
 @app.route('/info', methods=['GET'])
 def get_info():

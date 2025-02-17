@@ -7,6 +7,8 @@ function App() {
   const [newMessage, setNewMessage] = useState('');
   const [otherBots, setOtherBots] = useState([]);
   const [fungusName, setFungusName] = useState('');
+  const [models, setModels] = useState({});
+  const [isModelExpanded, setIsModelExpanded] = useState(false);
 
   // Generate a random fungus-themed name on component mount
   useEffect(() => {
@@ -33,15 +35,14 @@ function App() {
       try {
         // Send a GET request to the backend for recommendations
         const backendPort = process.env.REACT_APP_BACKEND_PORT;
-        console.log("backendPort: " + backendPort);
-        const response = await axios.get('http://127.0.0.1:' + backendPort + '/recommend', {
+        const response = await axios.get(`http://127.0.0.1:${backendPort}/recommend`, {
           params: { song_name: newMessage },
         });
 
         const recommendations = response.data.recommendations || [];
         const botMessage = {
           sender: 'bot',
-          text: `Recommendations for "${newMessage}": ${recommendations}`,
+          text: `Recommendations for "${newMessage}": ${recommendations.join(', ')}`,
         };
 
         // Add the bot response to the chat
@@ -69,6 +70,7 @@ function App() {
         const backendPort = process.env.REACT_APP_BACKEND_PORT;
         const response = await axios.get(`http://127.0.0.1:${backendPort}/bots`);
         setOtherBots(response.data.bots);
+        setModels(response.data.models || {});
       } catch (error) {
         console.error('Error loading other bots:', error);
         // Default to original hardcoded values if API fails
@@ -76,6 +78,7 @@ function App() {
           { name: 'Fungi 1', port: '3000' },
           { name: 'Fungi 2', port: '3001' }
         ]);
+        setModels({});
       }
     };
 
@@ -95,6 +98,8 @@ function App() {
         <div className="chat-title">
           <h1>{fungusName}</h1>
           <h2>Music Recommendation Fungus</h2>
+
+          {/* Related Bots Section */}
           <div>Related bots:</div>
           <div className="bots-list">
             {otherBots.map((bot, index) => (
@@ -103,6 +108,31 @@ function App() {
                 <a href={`http://localhost:${bot.port}`}>{bot.name}</a>
               </div>
             ))}
+          </div>
+
+          {/* Model Bots Section */}
+          <div className="model-section">
+            <button
+              className="toggle-button"
+              onClick={() => setIsModelExpanded(!isModelExpanded)}
+            >
+              {isModelExpanded ? 'Hide' : 'Show'} bots that train this model
+            </button>
+            {isModelExpanded && (
+              <div className="model-list">
+                {Object.keys(models).map((modelName, index) => (
+                  <div key={index} className="model-card">
+                    <h3>{modelName}</h3>
+                    {models[modelName].map((fungus, idx) => (
+                      <div key={idx} className="bot-card">
+                        <div className="bot-avatar">{fungus[0]}</div>
+                        <span>{fungus}</span>
+                      </div>
+                    ))}
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
 
