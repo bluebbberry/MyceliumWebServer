@@ -34,8 +34,8 @@ class MusicRecommendationFungus:
         self.machine_learning_service = MLService(self.knowledge_graph, user_ratings_csv='user_ratings.csv')
         self.knowledge_graph.insert_model_state("my-model", self.machine_learning_service.model.get_state())
         self.feedback_threshold = float(os.getenv("FEEDBACK_THRESHOLD", 0.5))
-        self.knowledge_graph.insert_fungus_data(3, os.getenv("FRONTEND_PORT", 3000))
         self.fungus_name = self.generate_fungus_name()
+        self.knowledge_graph.insert_fungus_data(3, self.fungus_name, os.getenv("FRONTEND_PORT", 3000))
         # default sleep time: 42300
         self.sleep_time = float(os.getenv("SLEEP_TIME", 42300))
         logging.info(f"[CONFIG] Feedback threshold set to {self.feedback_threshold}")
@@ -163,7 +163,7 @@ def get_bots():
     if len(all_fungi_data) > 0:
         logging.info("Retrieved all fungus links from knowledge base")
         all_fungi = [
-            {"name": f"Fungi {i + 1}", "port": fungus_data["link_to_model"]}
+            {"name": fungus_data["fungus_name"], "port": fungus_data["link_to_model"]}
             for i, fungus_data in enumerate(all_fungi_data)
         ]
     else:

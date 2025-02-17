@@ -204,7 +204,7 @@ class RDFKnowledgeGraph:
             print(f"Error retrieving song data: {e}")
             return []
 
-    def insert_fungus_data(self, fungus_id, link_to_model):
+    def insert_fungus_data(self, fungus_id, fungus_name, link_to_model):
         """
         Inserts the individual fungus data into the Fuseki knowledge base.
         """
@@ -217,6 +217,7 @@ class RDFKnowledgeGraph:
         INSERT DATA {{
             ex:fungus_{fungus_id} a ex:Fungus ;
                                ex:fungusId {fungus_id} ;
+                               ex:fungusName {fungus_name} ;
                                ex:linkToModel "{link_to_model}" .
         }}
         '''
@@ -246,6 +247,7 @@ class RDFKnowledgeGraph:
                 SELECT ?fungus_id ?link_to_model WHERE {
                     ?fungus a ex:Fungus ;
                             ex:fungusId ?fungus_id ;
+                            ex:fungusName ?fungus_name ;
                             ex:linkToModel ?link_to_model .
                 }
                 '''
