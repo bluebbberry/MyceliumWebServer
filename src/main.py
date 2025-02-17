@@ -35,7 +35,7 @@ class MusicRecommendationFungus:
         self.knowledge_graph.insert_model_state("my-model", self.machine_learning_service.model.get_state())
         self.feedback_threshold = float(os.getenv("FEEDBACK_THRESHOLD", 0.5))
         self.fungus_name = self.generate_fungus_name()
-        self.knowledge_graph.insert_fungus_data(3, self.fungus_name, os.getenv("FRONTEND_PORT", 3000))
+        self.knowledge_graph.upsert_fungus_data(os.getenv("FUNGUS_ID", 1), self.fungus_name, os.getenv("FRONTEND_PORT", 3000))
         # default sleep time: 42300
         self.sleep_time = float(os.getenv("SLEEP_TIME", 42300))
         logging.info(f"[CONFIG] Feedback threshold set to {self.feedback_threshold}")

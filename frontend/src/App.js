@@ -132,11 +132,11 @@ function App() {
               <div className="fungus-list">
                 {modelInfo.fungi.map((fungus, index) => (
                   <div key={index} className="fungus-card">
-                    <div className="fungus-name">{fungus}</div>
+                    <div className="fungus-name">{fungus}&nbsp;</div>
                     {allFungi
                       .filter((f) => f.name === fungus)
                       .map((fungusData, idx) => (
-                        <a key={idx} href={`http://localhost:${fungusData.port}`} target="_blank" rel="noopener noreferrer">
+                        <a key={idx} href={`http://localhost:${fungusData.port}`}>
                           Visit
                         </a>
                       ))}
@@ -152,8 +152,8 @@ function App() {
             <div className="fungus-list">
               {allFungi.map((fungus, index) => (
                 <div key={index} className="fungus-card">
-                  <div className="fungus-name">{fungus.name}</div>
-                  <a href={`http://localhost:${fungus.port}`} target="_blank" rel="noopener noreferrer">
+                  <div className="fungus-name">{fungus.name}&nbsp;</div>
+                  <a href={`http://localhost:${fungus.port}`}>
                     Visit
                   </a>
                 </div>

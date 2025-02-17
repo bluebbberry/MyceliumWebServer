@@ -5,6 +5,7 @@ services:
     environment:
       - PORT=5000
       - FRONTEND_PORT=3000
+      - FUNGUS_ID=1
     ports:
       - 5000:5000
     depends_on: [ fuseki ]
@@ -14,6 +15,7 @@ services:
     environment:
       - PORT=5001
       - FRONTEND_PORT=3001
+      - FUNGUS_ID=2
     ports:
       - 5001:5001
     depends_on: [ fuseki ]

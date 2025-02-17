@@ -204,34 +204,70 @@ class RDFKnowledgeGraph:
             print(f"Error retrieving song data: {e}")
             return []
 
-    def insert_fungus_data(self, fungus_id, fungus_name, link_to_model):
+    def upsert_fungus_data(self, fungus_id, fungus_name, link_to_model):
         """
-        Inserts the individual fungus data into the Fuseki knowledge base.
+        Updates the fungus data if it exists, otherwise inserts the fungus data into the Fuseki knowledge base.
         """
-        # Prepare the SPARQL query to insert the fungus data
+        # Prepare the SPARQL query to check if the fungus exists
         sparql = SPARQLWrapper(self.update_url)
-        sparql_insert_query = f'''
+        sparql_check_query = f'''
         PREFIX ex: <http://example.org/>
-        PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
-
-        INSERT DATA {{
-            ex:fungus_{fungus_id} a ex:Fungus ;
-                               ex:fungusId {fungus_id} ;
-                               ex:fungusName "{fungus_name}" ;
-                               ex:linkToModel "{link_to_model}" .
+        ASK {{
+            ex:fungus_{fungus_id} a ex:Fungus .
         }}
         '''
 
-        sparql.setQuery(sparql_insert_query)
-        sparql.setMethod('POST')
+        sparql.setQuery(sparql_check_query)
+        sparql.setMethod('GET')
         sparql.setReturnFormat(JSON)
         sparql.setCredentials("admin", "pw123")
 
         try:
-            sparql.query()
-            print(f"Fungus with ID '{fungus_id}' inserted successfully.")
+            result = sparql.query().convert()
+            fungus_exists = result['boolean']
+
+            if fungus_exists:
+                # If the fungus exists, update its data
+                sparql_update_query = f'''
+                PREFIX ex: <http://example.org/>
+                PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+
+                DELETE {{
+                    ex:fungus_{fungus_id} ex:fungusName ?name ;
+                                         ex:linkToModel ?link .
+                }}
+                INSERT {{
+                    ex:fungus_{fungus_id} ex:fungusName "{fungus_name}" ;
+                                         ex:linkToModel "{link_to_model}" .
+                }}
+                WHERE {{
+                    ex:fungus_{fungus_id} ex:fungusName ?name ;
+                                         ex:linkToModel ?link .
+                }}
+                '''
+                sparql.setQuery(sparql_update_query)
+                sparql.setMethod('POST')
+                sparql.query()
+                print(f"Fungus with ID '{fungus_id}' updated successfully.")
+            else:
+                # If the fungus doesn't exist, insert new data
+                sparql_insert_query = f'''
+                PREFIX ex: <http://example.org/>
+                PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+
+                INSERT DATA {{
+                    ex:fungus_{fungus_id} a ex:Fungus ;
+                                       ex:fungusId {fungus_id} ;
+                                       ex:fungusName "{fungus_name}" ;
+                                       ex:linkToModel "{link_to_model}" .
+                }}
+                '''
+                sparql.setQuery(sparql_insert_query)
+                sparql.setMethod('POST')
+                sparql.query()
+                print(f"Fungus with ID '{fungus_id}' inserted successfully.")
         except Exception as e:
-            print(f"Error inserting fungus: {e}")
+            print(f"Error upserting fungus: {e}")
 
     def get_all_fungi_data(self):
         """
