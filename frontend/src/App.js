@@ -88,7 +88,7 @@ function App() {
   };
 
   return (
-    <div className="fungus-container">
+    <div className="chat-container">
       <div className="chat-box">
         {/* Chat Section */}
         <div className="chat-title">

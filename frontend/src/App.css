@@ -70,7 +70,7 @@
 }
 
 /* list of known bots */
-.bots-list {
+.fungus-list {
   display: flex;
   flex-wrap: wrap;
   gap: 1rem;
@@ -79,7 +79,7 @@
   border-radius: 8px;
 }
 
-.bot-card {
+.fungus-card {
   display: flex;
   align-items: center;
   padding: 0.5rem 1rem;
@@ -89,21 +89,21 @@
   transition: transform 0.2s ease;
 }
 
-.bot-card:hover {
+.fungus-card:hover {
   transform: translateY(-2px);
 }
 
-.bot-card a {
+.fungus-card a {
   color: #333;
   text-decoration: none;
   font-weight: 500;
 }
 
-.bot-card a:hover {
+.fungus-card a:hover {
   color: #007bff;
 }
 
-.bot-avatar {
+.fungus-avatar {
   width: 32px;
   height: 32px;
   border-radius: 50%;
