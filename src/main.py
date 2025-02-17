@@ -156,8 +156,8 @@ def recommend():
     recommendations = music_service.get_song_recommendations(song_name)
     return jsonify({"song_name": song_name, "recommendations": recommendations[0]})
 
-@app.route('/bots', methods=['GET'])
-def get_bots():
+@app.route('/fungi', methods=['GET'])
+def get_fungi():
     """ Endpoint for bots configuration """
     all_fungi_data = music_service.knowledge_graph.get_all_fungi_data()
     if len(all_fungi_data) > 0:
