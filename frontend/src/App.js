@@ -8,6 +8,7 @@ function App() {
   const [fungusName, setFungusName] = useState('');
   const [modelInfo, setModelInfo] = useState(null);  // Model info (name and fungi that train it)
   const [allFungi, setAllFungi] = useState([]);     // All fungi known to the fungus
+  const [profileImage, setProfileImage] = useState('');
 
   // Fetch fungus name on component mount
   useEffect(() => {
@@ -22,6 +23,57 @@ function App() {
       }
     };
     fetchFungusName();
+  }, []);
+
+  // Function to generate a psychedelic pattern from a code
+  const generatePsychedelicImage = (code) => {
+    const canvas = document.createElement('canvas');
+    canvas.width = 128;
+    canvas.height = 128;
+    const ctx = canvas.getContext('2d');
+
+    // Clear the canvas
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // Create a more dense pattern with overlapping shapes
+    const stepSize = Math.max(10, 256 / Math.sqrt(code.length));
+
+    for (let y = 0; y < canvas.height; y += stepSize) {
+      for (let x = 0; x < canvas.width; x += stepSize) {
+        const charIndex = (x + y) % code.length;
+        const charCode = code.charCodeAt(charIndex);
+
+        ctx.fillStyle = `hsl(${(charCode * 137.508) % 360}, 100%, 50%)`;
+        ctx.beginPath();
+        ctx.arc(
+        x + stepSize / 2,
+          y + stepSize / 2,
+          (charCode % (stepSize / 2)) + stepSize / 4,
+          0,
+          Math.PI * 2
+        );
+        ctx.fill();
+      }
+    }
+
+    return canvas.toDataURL();
+  };
+
+
+  // Fetch random profile image code on mount
+  useEffect(() => {
+    const fetchProfileImageCode = async () => {
+      try {
+        const backendPort = process.env.REACT_APP_BACKEND_PORT;
+        const response = await axios.get(`http://127.0.0.1:${backendPort}/random-profile`);
+        const code = response.data.code;
+        const image = generatePsychedelicImage(code);
+        setProfileImage(image);
+      } catch (error) {
+        console.error('Error fetching random profile code:', error);
+      }
+    };
+    fetchProfileImageCode();
   }, []);
 
   // Fetch model fungi and all fungi (from earlier trainings)
@@ -94,6 +146,13 @@ function App() {
         <div className="chat-title">
           <h1>{fungusName}</h1>
           <h2>Music Recommendation Fungus</h2>
+
+          {/* Profile Image Section */}
+          {profileImage && (
+            <div className="profile-image-container">
+              <img src={profileImage} alt="Profile" className="profile-image" />
+            </div>
+          )}
 
           {/* Chat Messages */}
           <div className="messages">

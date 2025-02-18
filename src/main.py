@@ -12,6 +12,7 @@ from machine_learning_service import MLService
 from dotenv import load_dotenv
 from flask import Flask, request, jsonify
 from flask_cors import CORS
+import string
 
 load_dotenv()
 
@@ -35,6 +36,7 @@ class MusicRecommendationFungus:
         self.knowledge_graph.insert_model_state("my-model", self.machine_learning_service.model.get_state())
         self.feedback_threshold = float(os.getenv("FEEDBACK_THRESHOLD", 0.5))
         self.fungus_name = self.generate_fungus_name()
+        self.profile_picture_code = self.generate_random_code()
         self.knowledge_graph.insert_fungus_data(os.getenv("FUNGUS_ID", 1), self.fungus_name, os.getenv("FRONTEND_PORT", 3000))
         # default sleep time: 42300
         self.sleep_time = float(os.getenv("SLEEP_TIME", 42300))
@@ -109,6 +111,10 @@ class MusicRecommendationFungus:
         logging.info(f"[DECISION] Switch team: {switch_decision}")
         return switch_decision
 
+    def generate_random_code(self, length=16):
+        characters = string.ascii_letters + string.digits
+        return ''.join(random.choice(characters) for _ in range(length))
+
     def answer_user_feedback(self):
         statuses = self.mastodon_client.fetch_latest_statuses(None, None)
         feedback = 1
@@ -173,6 +179,12 @@ def get_fungi_data():
             {"name": "Fungi 2", "port": "3001"}
         ]
     return jsonify( { "allFungi": all_fungi, "model": { "name": "MyModel", "fungi": [ music_service.fungus_name ]}} )
+
+@app.route('/random-profile', methods=['GET'])
+def get_random_profile():
+    return jsonify({
+        'code': music_service.profile_picture_code
+    })
 
 @app.route('/info', methods=['GET'])
 def get_fungus_info():
