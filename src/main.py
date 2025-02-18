@@ -172,7 +172,7 @@ def get_fungi_data():
             {"name": "Fungi 1", "port": "3000"},
             {"name": "Fungi 2", "port": "3001"}
         ]
-    return jsonify( { "allFungi": all_fungi, "model": { "name": "MyModel", "fungi": [ all_fungi[0]["name"] ]}} )
+    return jsonify( { "allFungi": all_fungi, "model": { "name": "MyModel", "fungi": [ music_service.fungus_name ]}} )
 
 @app.route('/info', methods=['GET'])
 def get_fungus_info():
