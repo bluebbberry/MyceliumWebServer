@@ -7,6 +7,12 @@
   background-color: #f0f0f0;
 }
 
+.profile-image-container {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 10px;
+}
+
 .chat-box {
   width: 400px;
   max-width: 100%;
