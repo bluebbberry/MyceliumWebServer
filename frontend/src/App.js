@@ -10,8 +10,8 @@ function App() {
   const [allFungi, setAllFungi] = useState([]);     // All fungi known to the fungus
   const [profileImage, setProfileImage] = useState('');
 
-  const socialUrl = process.env.REACT_APP_SEMANTIC_URL;
-  const semanticUrl = process.env.REACT_APP_SOCIAL_URL;
+  const socialUrl = process.env.REACT_APP_SOCIAL_URL;
+  const semanticUrl = process.env.REACT_APP_SEMANTIC_URL;
 
   // Fetch fungus name on component mount
   useEffect(() => {
@@ -148,7 +148,7 @@ function App() {
         {/* Chat Section */}
         <div className="chat-title">
           <h1>{fungusName}</h1>
-          <h2>Music Recommendation Fungus</h2>
+          <h3>Music Recommendation Fungus</h3>
 
           {/* Profile Image Section */}
           {profileImage && (
@@ -190,7 +190,7 @@ function App() {
           {/* Model Fungi Section (First Line) */}
           {modelInfo && (
             <div className="model-line">
-              <h3>Model: {modelInfo.name}</h3>
+              <h3>Model: {modelInfo.name} - learning group:</h3>
               <div className="fungus-list">
                 {modelInfo.fungi.map((fungus, index) => (
                   <div key={index} className="fungus-card">
