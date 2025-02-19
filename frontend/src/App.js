@@ -10,6 +10,9 @@ function App() {
   const [allFungi, setAllFungi] = useState([]);     // All fungi known to the fungus
   const [profileImage, setProfileImage] = useState('');
 
+  const socialUrl = process.env.REACT_APP_SEMANTIC_URL;
+  const semanticUrl = process.env.REACT_APP_SOCIAL_URL;
+
   // Fetch fungus name on component mount
   useEffect(() => {
     const fetchFungusName = async () => {
@@ -111,7 +114,7 @@ function App() {
         const recommendations = response.data.recommendations || [];
         const botMessage = {
           sender: 'bot',
-          text: `Recommendations for "${newMessage}": ${recommendations}`,
+          text: `I would recommend you ${recommendations}`,
         };
 
         // Add the bot response to the chat
@@ -217,6 +220,15 @@ function App() {
                   </a>
                 </div>
               ))}
+            </div>
+          </div>
+
+          {/* Dropdown Button for External Links */}
+          <div className="dropdown">
+            <button className="dropbtn">On other Webs</button>
+              <div className="dropdown-content">
+                <a href={socialUrl} target="_blank" rel="noopener noreferrer">Social</a>
+                <a href={semanticUrl} target="_blank" rel="noopener noreferrer">Semantic</a>
             </div>
           </div>
         </div>
