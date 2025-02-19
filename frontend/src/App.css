@@ -7,6 +7,12 @@
   background-color: #f0f0f0;
 }
 
+.profile-image-container {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 10px;
+}
+
 .chat-box {
   width: 400px;
   max-width: 100%;
@@ -67,4 +73,51 @@
   background-color: #f8d7da;
   text-align: left;
   align-self: flex-start;
+}
+
+/* list of known bots */
+.fungus-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  padding: 1rem;
+  background-color: #f5f5f5;
+  border-radius: 8px;
+}
+
+.fungus-card {
+  display: flex;
+  align-items: center;
+  padding: 0.5rem 1rem;
+  background-color: white;
+  border-radius: 20px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  transition: transform 0.2s ease;
+}
+
+.fungus-card:hover {
+  transform: translateY(-2px);
+}
+
+.fungus-card a {
+  color: #333;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.fungus-card a:hover {
+  color: #007bff;
+}
+
+.fungus-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background-color: #e0e0e0;
+  margin-right: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  color: #666;
 }

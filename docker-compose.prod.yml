@@ -5,19 +5,8 @@ services:
     environment:
       - PORT=5000
       - FRONTEND_PORT=3000
-      - FUNGUS_ID=1
     ports:
       - 5000:5000
-    depends_on: [ fuseki ]
-  fungi2:
-    build: .
-    restart: always
-    environment:
-      - PORT=5001
-      - FRONTEND_PORT=3001
-      - FUNGUS_ID=2
-    ports:
-      - 5001:5001
     depends_on: [ fuseki ]
 
   fungi-frontend:
@@ -30,18 +19,6 @@ services:
     restart: always
     environment:
       - PORT=3000
-    depends_on: [ fungi ]
-  fungi-frontend2:
-    build:
-      context: ./frontend
-      args:
-        REACT_APP_BACKEND_PORT: 5001
-    ports:
-      - 3001:3001
-    restart: always
-    environment:
-      - PORT=3001
-    depends_on: [ fungi2 ]
 
   fuseki:
     image: "stain/jena-fuseki"

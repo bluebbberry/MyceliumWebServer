@@ -12,6 +12,7 @@ from machine_learning_service import MLService
 from dotenv import load_dotenv
 from flask import Flask, request, jsonify
 from flask_cors import CORS
+import string
 
 load_dotenv()
 
@@ -34,9 +35,22 @@ class MusicRecommendationFungus:
         self.machine_learning_service = MLService(self.knowledge_graph, user_ratings_csv='user_ratings.csv')
         self.knowledge_graph.insert_model_state("my-model", self.machine_learning_service.model.get_state())
         self.feedback_threshold = float(os.getenv("FEEDBACK_THRESHOLD", 0.5))
+        self.fungus_name = self.generate_fungus_name()
+        self.profile_picture_code = self.generate_random_code()
+        self.knowledge_graph.insert_fungus_data(os.getenv("FUNGUS_ID", 1), self.fungus_name, os.getenv("FRONTEND_PORT", 3000))
         # default sleep time: 42300
         self.sleep_time = float(os.getenv("SLEEP_TIME", 42300))
         logging.info(f"[CONFIG] Feedback threshold set to {self.feedback_threshold}")
+
+    def generate_fungus_name(self):
+        fungus_prefixes = [
+            "Shroom", "Toadstool", "Spore", "Mycelium", "Cap", "Gilly", "Truffle", "Fungi", "Mush", "Puff"
+        ]
+        fungus_suffixes = [ 'Sage', 'Oracle', 'Whisperer', 'Teller', 'Connoisseur', 'Seer', 'Enchanter', 'Charmer', 'Mystic' ]
+        prefix = random.choice(fungus_prefixes)
+        suffix = random.choice(fungus_suffixes)
+        fungus_name = f"{prefix} {suffix}"
+        return fungus_name
 
     def start(self):
         switch_team = True
@@ -97,6 +111,10 @@ class MusicRecommendationFungus:
         logging.info(f"[DECISION] Switch team: {switch_decision}")
         return switch_decision
 
+    def generate_random_code(self, length=16):
+        characters = string.ascii_letters + string.digits
+        return ''.join(random.choice(characters) for _ in range(length))
+
     def answer_user_feedback(self):
         statuses = self.mastodon_client.fetch_latest_statuses(None, None)
         feedback = 1
@@ -134,7 +152,7 @@ music_service = MusicRecommendationFungus()
 
 
 @app.route('/recommend', methods=['GET'])
-def recommend():
+def get_recommendation():
     """Endpoint to get song recommendations."""
     song_name = request.args.get('song_name')
     if not song_name:
@@ -143,6 +161,37 @@ def recommend():
     logging.info(f"[REQUEST] Received recommendation request for song: {song_name}")
     recommendations = music_service.get_song_recommendations(song_name)
     return jsonify({"song_name": song_name, "recommendations": recommendations[0]})
+
+@app.route('/fungi', methods=['GET'])
+def get_fungi_data():
+    """ Endpoint for bots configuration """
+    all_fungi_data = music_service.knowledge_graph.get_all_fungi_data()
+    if len(all_fungi_data) > 0:
+        logging.info("Retrieved all fungus links from knowledge base")
+        all_fungi = [
+            {"name": fungus_data["fungus_name"], "port": fungus_data["link_to_model"]}
+            for i, fungus_data in enumerate(all_fungi_data)
+        ]
+    else:
+        logging.error("Unable to retrieve fungus data from knowledge base - use default values")
+        all_fungi = [
+            {"name": "Fungi 1", "port": "3000"},
+            {"name": "Fungi 2", "port": "3001"}
+        ]
+    return jsonify( { "allFungi": all_fungi, "model": { "name": "MyModel", "fungi": [ music_service.fungus_name ]}} )
+
+@app.route('/random-profile', methods=['GET'])
+def get_random_profile():
+    return jsonify({
+        'code': music_service.profile_picture_code
+    })
+
+@app.route('/info', methods=['GET'])
+def get_fungus_info():
+    info = {
+        "name": music_service.fungus_name
+    }
+    return jsonify({"info": info})
 
 
 if __name__ == "__main__":

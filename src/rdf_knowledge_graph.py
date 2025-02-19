@@ -204,6 +204,81 @@ class RDFKnowledgeGraph:
             print(f"Error retrieving song data: {e}")
             return []
 
+    def insert_fungus_data(self, fungus_id, fungus_name, link_to_model):
+        """
+        Inserts the individual fungus data into the Fuseki knowledge base.
+        """
+        # Prepare the SPARQL query to insert the fungus data
+        sparql = SPARQLWrapper(self.update_url)
+        sparql_insert_query = f'''
+        PREFIX ex: <http://example.org/>
+        PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+
+        INSERT DATA {{
+            ex:fungus_{fungus_id} a ex:Fungus ;
+                               ex:fungusId {fungus_id} ;
+                               ex:fungusName "{fungus_name}" ;
+                               ex:linkToModel "{link_to_model}" .
+        }}
+        '''
+
+        sparql.setQuery(sparql_insert_query)
+        sparql.setMethod('POST')
+        sparql.setReturnFormat(JSON)
+        sparql.setCredentials("admin", "pw123")
+
+        try:
+            sparql.query()
+            print(f"Fungus with ID '{fungus_id}' inserted successfully.")
+        except Exception as e:
+            print(f"Error inserting fungus: {e}")
+
+    def get_all_fungi_data(self):
+        """
+        Retrieves data about other fungi from the Fuseki knowledge base.
+        """
+
+        # Prepare the SPARQL query to retrieve all fungus data
+        sparql = SPARQLWrapper(self.query_url)
+        sparql_select_query = '''
+                PREFIX ex: <http://example.org/>
+                PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+
+                SELECT ?fungus_id ?link_to_model ?fungus_name WHERE {
+                    ?fungus a ex:Fungus ;
+                            ex:fungusId ?fungus_id ;
+                            ex:fungusName ?fungus_name ;
+                            ex:linkToModel ?link_to_model .
+                }
+                '''
+
+        sparql.setQuery(sparql_select_query)
+        sparql.setReturnFormat(JSON)
+        sparql.setCredentials("admin", "pw123")
+
+        try:
+
+            results = sparql.query().convert()
+
+            # Process the result
+            fungi = []
+            for fungus_data in results["results"]["bindings"]:
+                fungus_info = {
+                    "fungus_id": fungus_data["fungus_id"]["value"],
+                    "link_to_model": fungus_data["link_to_model"]["value"],
+                    "fungus_name": fungus_data["fungus_name"]["value"]
+                }
+                fungi.append(fungus_info)
+
+            if fungi:
+                return fungi
+            else:
+                print("No fungi found in the database.")
+                return []
+        except Exception as e:
+            print(f"Error retrieving fungus data: {e}")
+            return []
+
     def retrieve_all_model_states(self, link_to_model):
         """
         Retrieves all model parameters stored in the Fuseki server and decodes them.
