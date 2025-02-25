@@ -47,6 +47,33 @@ services:
       - PORT=3001
     depends_on: [ fungi2 ]
 
+  fungi-backend:
+    build:
+      context: ./backend/fungus-backend
+      args:
+        REACT_APP_BACKEND_PORT: 5000
+        REACT_APP_SEMANTIC_URL: "http://localhost:3030"
+        REACT_APP_SOCIAL_URL: "https://techhub.social/@myceliumweb"
+    ports:
+      - 3003:3003
+    restart: always
+    environment:
+      - PORT=3003
+    depends_on: [ fungi ]
+  fungi-backend2:
+    build:
+      context: ./backend/fungus-backend
+      args:
+        REACT_APP_BACKEND_PORT: 5001
+        REACT_APP_SEMANTIC_URL: "http://localhost:3030"
+        REACT_APP_SOCIAL_URL: "https://techhub.social/@myceliumweb"
+    ports:
+      - 8000:8000
+    restart: always
+    environment:
+      - PORT=8000
+    depends_on: [ fungi2 ]
+
   fuseki:
     image: "stain/jena-fuseki"
     restart: always
