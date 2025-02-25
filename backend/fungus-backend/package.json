@@ -1,10 +1,11 @@
 {
   "type": "module",
   "dependencies": {
-    "@dotenvx/dotenvx": "^1.38.1",
-    "@fedify/fedify": "^1.4.3",
+    "@dotenvx/dotenvx": "^1.38.2",
+    "@fedify/fedify": "^1.4.4",
     "@hono/node-server": "^1.13.8",
     "@logtape/logtape": "^0.8.2",
+    "hono": "^4.7.2",
     "tsx": "^4.19.3",
     "x-forwarded-fetch": "^0.2.0"
   },
@@ -12,7 +13,7 @@
     "@biomejs/biome": "^1.9.4"
   },
   "scripts": {
-    "dev": "dotenvx run -- tsx watch ./main.ts",
-    "prod": "dotenvx run -- node --import tsx ./main.ts"
+    "dev": "dotenvx run -- tsx watch ./src/index.ts",
+    "prod": "dotenvx run -- node --import tsx ./src/index.ts"
   }
 }
