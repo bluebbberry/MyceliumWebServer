@@ -1,4 +1,4 @@
-import { createFederation, exportJwk, generateCryptoKeyPair, importJwk, Follow, Person, MemoryKvStore, Activity } from '@fedify/fedify';
+import { createFederation, exportJwk, generateCryptoKeyPair, importJwk, Follow, Person, Accept, MemoryKvStore, Activity } from '@fedify/fedify';
 import { behindProxy } from 'x-forwarded-fetch';
 import { serve } from '@hono/node-server';
 
@@ -72,8 +72,14 @@ federation
     const parsed = ctx.parseUri(follow.objectId);
     if (parsed?.type !== "actor" || parsed.identifier !== SERVER_NAME) return;
     const follower = await follow.getActor(ctx);
+
+    if (follower == null) return;
+    // Note that if a server receives a `Follow` activity, it should reply
+    // with either an `Accept` or a `Reject` activity.  In this case, the
+    // server automatically accepts the follow request:
+    await ctX.sendActivity({ identifier: parsed.identifier }, follower, new Accept({ actor: follow.objectId, object: follow}),
     console.debug(follower);
-  });
+});
 
 // Start server
 serve({
