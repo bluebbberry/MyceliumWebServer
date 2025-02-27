@@ -1,4 +1,7 @@
 services:
+# ----------------------------------------------
+# ------------ INFERENCE CONTAINER -------------
+# ----------------------------------------------
   fungi:
     build: .
     restart: always
@@ -9,6 +12,7 @@ services:
     ports:
       - 5000:5000
     depends_on: [ fuseki ]
+
   fungi2:
     build: .
     restart: always
@@ -20,6 +24,9 @@ services:
       - 5001:5001
     depends_on: [ fuseki ]
 
+# ---------------------------------------------
+# ------------ FRONTEND CONTAINER -------------
+# ---------------------------------------------
   fungi-frontend:
     build:
       context: ./frontend
@@ -33,6 +40,7 @@ services:
     environment:
       - PORT=3000
     depends_on: [ fungi ]
+
   fungi-frontend2:
     build:
       context: ./frontend
@@ -47,6 +55,9 @@ services:
       - PORT=3001
     depends_on: [ fungi2 ]
 
+# --------------------------------------------
+# ------------ BACKEND CONTAINER -------------
+# --------------------------------------------
   fungi-backend:
     build:
       context: ./backend/fungus-backend
@@ -59,7 +70,10 @@ services:
     restart: always
     environment:
       - PORT=3003
+      - FEDIFY_SERVER_NAME=fungi-backend
+      - PEER_SERVER=http://fungi-backend2:3004
     depends_on: [ fungi ]
+
   fungi-backend2:
     build:
       context: ./backend/fungus-backend
@@ -68,12 +82,17 @@ services:
         REACT_APP_SEMANTIC_URL: "http://localhost:3030"
         REACT_APP_SOCIAL_URL: "https://techhub.social/@myceliumweb"
     ports:
-      - 8000:8000
+      - 3004:3004
     restart: always
     environment:
-      - PORT=8000
+      - PORT=3004
+      - FEDIFY_SERVER_NAME=fungi-backend2
+      - PEER_SERVER=http://fungi-backend:3003
     depends_on: [ fungi2 ]
 
+# ---------------------------------------------------
+# ------------ KNOWLEDGE BASE CONTAINER -------------
+# ---------------------------------------------------
   fuseki:
     image: "stain/jena-fuseki"
     restart: always
