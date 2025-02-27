@@ -17,7 +17,7 @@
     "@biomejs/biome": "^1.9.4"
   },
   "scripts": {
-    "dev": "dotenvx run -- tsx watch ./src/index.ts",
-    "prod": "dotenvx run -- node --import tsx ./src/index.ts"
+    "dev": "dotenvx run -- tsx watch ./src/index.tsx",
+    "prod": "dotenvx run -- node --import tsx ./src/index.tsx"
   }
 }
