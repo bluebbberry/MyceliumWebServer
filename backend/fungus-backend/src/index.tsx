@@ -135,25 +135,15 @@ async function sendFollow(ctx: Context<void>, senderId: string) {
     }
 }
 
-federation.setFollowersDispatcher("/users/{identifier}/followers", async (ctx, identifier) => {
-    console.log(`[${SERVER_NAME}] Fetching followers for ${identifier}`);
-
-    try {
-        if (identifier !== SERVER_NAME) {
-            return null;
-        }
-
-        const followers = (await ctx.kv.get<string[]>(["followers"]))?.value || [];
-        console.log(`[${SERVER_NAME}] Followers list:`, followers);
-
-        return followers.map(followerId => new URL(followerId));
-    } catch (error) {
-        console.error(`[${SERVER_NAME}] Error fetching followers for ${identifier}:`, error);
-        throw error;
-    }
-}).setFirstCursor(async (ctx, identifier) => {
-    return "";  // Assumes beginning of the collection.
-});
+// Since the blog does not follow anyone, the following dispatcher is
+// implemented to return just an empty list:
+federation.setFollowingDispatcher(
+    "/users/{identifier}/following",
+    async (_ctx, identifier, _cursor) => {
+        console.log(`[${SERVER_NAME}] Fetching followers for ${identifier}`);
+        return { items: [] };
+    },
+);
 
 // Start server
 serve({
