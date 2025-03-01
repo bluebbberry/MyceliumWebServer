@@ -60,7 +60,7 @@ services:
 # --------------------------------------------
   fungi-backend:
     build:
-      context: ./backend/fungus-backend
+      context: ./backend
       args:
         REACT_APP_BACKEND_PORT: 5000
         REACT_APP_SEMANTIC_URL: "http://localhost:3030"
@@ -78,7 +78,7 @@ services:
 
   fungi-backend2:
     build:
-      context: ./backend/fungus-backend
+      context: ./backend
       args:
         REACT_APP_BACKEND_PORT: 5001
         REACT_APP_SEMANTIC_URL: "http://localhost:3030"

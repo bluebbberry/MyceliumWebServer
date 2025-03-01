@@ -1,0 +1,36 @@
+{
+  "name": "fedify-express-example",
+  "version": "1.0.0",
+  "description": "Fedify Express Example",
+  "main": "src/app.ts",
+  "type": "module",
+  "scripts": {
+    "dev": "dotenvx run -- tsx watch ./src/app.ts",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "Fedify",
+    "Express"
+  ],
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/fedify-dev/fedify/issues"
+  },
+  "homepage": "https://github.com/fedify-dev/fedify/tree/main/examples/express#readme",
+  "devDependencies": {
+    "@types/express": "^4.17.21",
+    "@types/node": "^22.5.1",
+    "tsx": "^4.19.0",
+    "typescript": "^5.5.4"
+  },
+  "dependencies": {
+    "@dotenvx/dotenvx": "^1.38.2",
+    "@fedify/express": "^0.2.0",
+    "@fedify/fedify": "^1.2.7",
+    "@hono/node-server": "^1.13.8",
+    "@logtape/logtape": "^0.8.0",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.0",
+    "x-forwarded-fetch": "^0.2.0"
+  }
+}
