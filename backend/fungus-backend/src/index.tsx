@@ -40,7 +40,7 @@ federation.setActorDispatcher("/users/{identifier}", async (ctx, identifier) => 
   });
 })
 .setKeyPairsDispatcher(async (ctx, identifier) => {
-  if (identifier != SERVER_NAME) return [];  // Other than "me" is not found.
+  // if (identifier != SERVER_NAME) return [];  // Other than "me" is not found.
   const entry = await kv.get<{
     privateKey: JsonWebKey;
     publicKey: JsonWebKey;
@@ -98,12 +98,16 @@ async function sendFollow(
     }
 
     const recipientUrl = new URL(`${PEER_SERVER}/users/${PEER_SERVER_NAME}`);
+    const recipientInboxUrl = new URL(`${recipientUrl}/inbox`);
+    const recipient: Recipient = { id: recipientUrl, inboxId: recipientInboxUrl } as Recipient;
 
     console.log(`[${SERVER_NAME}] Sending follow request to ${recipientUrl.href}`);
 
+    const sender = { identifier: senderId };
+
     await ctx.sendActivity(
-        { username: SERVER_NAME },
-        "followers",
+        sender, // that's actually the sender
+        recipient,
         new Follow({
             id: new URL(`${DOMAIN}/${senderId}/follows/${SERVER_NAME}`),
             actor: ctx.getActorUri(senderId),
@@ -111,6 +115,25 @@ async function sendFollow(
         })
     );
 }
+
+federation.setFollowersDispatcher("/users/{identifier}/followers", async (ctx, identifier) => {
+    console.log(`[${SERVER_NAME}] Fetching followers for ${identifier}`);
+
+    if (identifier !== SERVER_NAME) {
+        return null;  // Only handle requests for the current server
+    }
+
+    // Retrieve followers from an in-memory store (or replace with a database)
+    const followers = (await ctx.kv.get<string[]>(["followers"]))?.value || [];
+
+    console.log(`[${SERVER_NAME}] Followers list:`, followers);
+
+    return followers.map(followerId => new URL(followerId));
+}).setFirstCursor(async (ctx, identifier) => {
+    // Let's assume that an empty string represents the beginning of the
+    // collection:
+    return "";  // Note that it's not `null`.
+});
 
 // Start server
 serve({
