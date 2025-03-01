@@ -72,6 +72,7 @@ services:
       - PORT=3003
       - FEDIFY_SERVER_NAME=fungi-backend
       - PEER_SERVER=http://fungi-backend2:3004
+      - PEER_SERVER_NAME=fungi-backend2
     depends_on: [ fungi ]
 
   fungi-backend2:
@@ -88,6 +89,7 @@ services:
       - PORT=3004
       - FEDIFY_SERVER_NAME=fungi-backend2
       - PEER_SERVER=http://fungi-backend:3003
+      - PEER_SERVER_NAME=fungi-backend
     depends_on: [ fungi2 ]
 
 # ---------------------------------------------------

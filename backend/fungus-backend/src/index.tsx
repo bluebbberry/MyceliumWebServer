@@ -1,12 +1,15 @@
 import { createFederation, exportJwk, generateCryptoKeyPair, importJwk, Follow, Person, Accept, MemoryKvStore, Activity } from '@fedify/fedify';
 import { behindProxy } from 'x-forwarded-fetch';
 import { serve } from '@hono/node-server';
+import { type Context, type Recipient } from "@fedify/fedify";
 
 const PORT = process.env.PORT || 3000;
 const SERVER_NAME = process.env.FEDIFY_SERVER_NAME || 'server1';
 const DOMAIN = `http://${SERVER_NAME}:${PORT}`;
 const PEER_SERVER = process.env.PEER_SERVER || null;
-const federation = createFederation({ kv: new MemoryKvStore() });
+const PEER_SERVER_NAME = process.env.PEER_SERVER_NAME || null;
+const kv = new MemoryKvStore();
+const federation = createFederation({ kv });
 
 const userId = `${DOMAIN}/users/${SERVER_NAME}`;
 
@@ -66,23 +69,57 @@ federation.setActorDispatcher("/users/{identifier}", async (ctx, identifier) => 
 federation
   .setInboxListeners("/users/{identifier}/inbox", "/inbox")
   .on(Follow, async (ctx, follow) => {
-    if (follow.id == null || follow.actorId == null || follow.objectId == null) {
-      return;
-    }
-    const parsed = ctx.parseUri(follow.objectId);
-    if (parsed?.type !== "actor" || parsed.identifier !== SERVER_NAME) return;
-    const follower = await follow.getActor(ctx);
+    if (!follow.id || !follow.actorId || !follow.objectId) return;
 
-    if (follower == null) return;
-    // Note that if a server receives a `Follow` activity, it should reply
-    // with either an `Accept` or a `Reject` activity.  In this case, the
-    // server automatically accepts the follow request:
-    await ctX.sendActivity({ identifier: parsed.identifier }, follower, new Accept({ actor: follow.objectId, object: follow}),
-    console.debug(follower);
+    const parsed = ctx.parseUri(follow.objectId);
+    if (!parsed || parsed.type !== "actor" || parsed.identifier !== SERVER_NAME) return;
+
+    const follower = await follow.getActor(ctx);
+    if (!follower) return;
+
+    console.log(`[${SERVER_NAME}] Accepted follow request from ${follower.id}`);
+
+    await ctx.sendActivity(
+        { identifier: parsed.identifier },
+        follower,
+        new Accept({ actor: follow.objectId, object: follow })
+    );
 });
+
+async function sendFollow(
+    ctx: Context<void>,
+    senderId: string
+) {
+    if (!PEER_SERVER) {
+        console.error("No peer server specified");
+        return;
+    }
+
+    const recipientUrl = new URL(`${PEER_SERVER}/users/${PEER_SERVER_NAME}`);
+    const recipient: Recipient = { id: new URL(recipientUrl.href) } as Recipient;
+
+    console.log(`[${SERVER_NAME}] Sending follow request to ${recipientUrl.href}`);
+
+    await ctx.sendActivity(
+        { identifier: senderId },
+        recipient,
+        new Follow({
+            id: new URL(`${DOMAIN}/${senderId}/follows/${SERVER_NAME}`),
+            actor: ctx.getActorUri(senderId),
+            object: recipient.id,
+        })
+    );
+}
 
 // Start server
 serve({
-    fetch: (request) => { behindProxy(request => federation.fetch(request, { contextData : undefined })) },
+    fetch: behindProxy(request => federation.fetch(request, { contextData: undefined })),
     port: PORT,
 });
+
+setTimeout(async function() {
+    const ctx = federation.createContext(new Request(DOMAIN), undefined);
+    await sendFollow(ctx, SERVER_NAME);
+    console.log("Send follow request to other server");
+}, 5000);
+
