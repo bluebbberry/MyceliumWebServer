@@ -46,6 +46,7 @@ federation.setActorDispatcher("/users/{identifier}", async (ctx, identifier) => 
     publicKey: JsonWebKey;
   }>(["key"]);
   if (entry == null || entry.value == null) {
+    console.log(`[${SERVER_NAME}] Generating new key pair...`);
     // Generate a new key pair at the first time:
     const { privateKey, publicKey } =
       await generateCryptoKeyPair("RSASSA-PKCS1-v1_5");
@@ -69,6 +70,7 @@ federation.setActorDispatcher("/users/{identifier}", async (ctx, identifier) => 
 federation
   .setInboxListeners("/users/{identifier}/inbox", "/inbox")
   .on(Follow, async (ctx, follow) => {
+    console.log(`[${SERVER_NAME}] Received follow request:`, follow);
     if (!follow.id || !follow.actorId || !follow.objectId) return;
 
     const parsed = ctx.parseUri(follow.objectId);
@@ -96,17 +98,16 @@ async function sendFollow(
     }
 
     const recipientUrl = new URL(`${PEER_SERVER}/users/${PEER_SERVER_NAME}`);
-    const recipient: Recipient = { id: new URL(recipientUrl.href) } as Recipient;
 
     console.log(`[${SERVER_NAME}] Sending follow request to ${recipientUrl.href}`);
 
     await ctx.sendActivity(
-        { identifier: senderId },
-        recipient,
+        { username: SERVER_NAME },
+        "followers",
         new Follow({
             id: new URL(`${DOMAIN}/${senderId}/follows/${SERVER_NAME}`),
             actor: ctx.getActorUri(senderId),
-            object: recipient.id,
+            object: new URL(recipientUrl.href),
         })
     );
 }
