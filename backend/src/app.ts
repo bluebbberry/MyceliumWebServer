@@ -28,111 +28,125 @@ const relationStore = new Map<string, string>();
 
 // Logging settings for diagnostics:
 await configure({
-  sinks: { console: getConsoleSink() },
-  filters: {},
-  loggers: [
-    {
-      category: "fedify",
-      lowestLevel: "debug",
-      sinks: ["console"],
-      filters: [],
-    },
-    {
-      category: ["logtape", "meta"],
-      lowestLevel: "warning",
-      sinks: ["console"],
-      filters: [],
-    },
-  ],
+    sinks: { console: getConsoleSink() },
+    filters: {},
+    loggers: [
+        {
+            category: "fedify",
+            lowestLevel: "debug",
+            sinks: ["console"],
+            filters: [],
+        },
+        {
+            category: ["logtape", "meta"],
+            lowestLevel: "warning",
+            sinks: ["console"],
+            filters: [],
+        },
+    ],
 });
 
 const federation = createFederation<void>({
-  kv: new MemoryKvStore(),
+    kv: new MemoryKvStore(),
 });
 
+// Setting up actor and key pairs dispatchers
 federation
-  .setActorDispatcher("/users/{identifier}", async (ctx, identifier) => {
-    if (identifier != SERVER_NAME) {
-      return null;
-    }
-    const keyPairs = await ctx.getActorKeyPairs(identifier);
-    return new Person({
-      id: ctx.getActorUri(identifier),
-      name: SERVER_NAME,
-      summary: "This is a Fungus account",
-      preferredUsername: identifier,
-      url: new URL("/", ctx.url),
-      inbox: ctx.getInboxUri(identifier),
-      endpoints: new Endpoints({
-        sharedInbox: ctx.getInboxUri(),
-      }),
-      publicKey: keyPairs[0].cryptographicKey,
-      assertionMethods: keyPairs.map((keyPair) => keyPair.multikey),
+    .setActorDispatcher("/users/{identifier}", async (ctx, identifier) => {
+        if (identifier !== SERVER_NAME) {
+            return null;
+        }
+        try {
+            const keyPairs = await ctx.getActorKeyPairs(identifier);
+            return new Person({
+                id: ctx.getActorUri(identifier),
+                name: SERVER_NAME,
+                summary: "This is a Fungus account",
+                preferredUsername: identifier,
+                url: new URL("/", ctx.url),
+                inbox: ctx.getInboxUri(identifier),
+                endpoints: new Endpoints({
+                    sharedInbox: ctx.getInboxUri(),
+                }),
+                publicKey: keyPairs[0].cryptographicKey,
+                assertionMethods: keyPairs.map((keyPair) => keyPair.multikey),
+            });
+        } catch (error) {
+            console.error(`[${SERVER_NAME}] Error fetching actor: ${identifier}`, error);
+            throw new Error(`Error fetching actor: ${identifier}`);
+        }
+    })
+    .setKeyPairsDispatcher(async (_, identifier) => {
+        if (identifier !== SERVER_NAME) {
+            return [];
+        }
+        try {
+            let keyPairs = keyPairsStore.get(identifier);
+            if (!keyPairs) {
+                const { privateKey, publicKey } = await generateCryptoKeyPair();
+                keyPairs = [{ privateKey, publicKey }];
+                keyPairsStore.set(identifier, keyPairs);
+            }
+            return keyPairs;
+        } catch (error) {
+            console.error(`[${SERVER_NAME}] Error fetching key pairs for ${identifier}`, error);
+            throw new Error(`Error fetching key pairs for ${identifier}`);
+        }
     });
-  })
-  .setKeyPairsDispatcher(async (_, identifier) => {
-    if (identifier != SERVER_NAME) {
-      return [];
-    }
-    const keyPairs = keyPairsStore.get(identifier);
-    if (keyPairs) {
-      return keyPairs;
-    }
-    const { privateKey, publicKey } = await generateCryptoKeyPair();
-    keyPairsStore.set(identifier, [{ privateKey, publicKey }]);
-    return [{ privateKey, publicKey }];
-  });
 
+// Set up the federation inbox listeners
 federation
-  .setInboxListeners("/users/{identifier}/inbox", "/inbox")
-  .on(Follow, async (context, follow) => {
-    if (
-      follow.id == null ||
-      follow.actorId == null ||
-      follow.objectId == null
-    ) {
-      return;
-    }
-    const result = context.parseUri(follow.objectId);
-    if (result?.type !== "actor" || result.identifier !== SERVER_NAME) {
-      return;
-    }
-    const follower = await follow.getActor(context);
-    if (follower?.id == null) {
-      throw new Error("follower is null");
-    }
-    await context.sendActivity(
-      { identifier: result.identifier },
-      follower,
-      new Accept({
-        id: new URL(
-          `#accepts/${follower.id.href}`,
-          context.getActorUri(SERVER_NAME),
-        ),
-        actor: follow.objectId,
-        object: follow,
-      }),
-    );
-    relationStore.set(follower.id.href, follow.objectId.href);
-  })
-  .on(Undo, async (context, undo) => {
-    const activity = await undo.getObject(context);
-    if (activity instanceof Follow) {
-      if (activity.id == null) {
-        return;
-      }
-      if (undo.actorId == null) {
-        return;
-      }
-      relationStore.delete(undo.actorId.href);
-    } else {
-      console.debug(undo);
-    }
-  });
+    .setInboxListeners("/users/{identifier}/inbox", "/inbox")
+    .on(Follow, async (context, follow) => {
+        if (!follow.id || !follow.actorId || !follow.objectId) {
+            console.warn(`[${SERVER_NAME}] Invalid Follow object received`, follow);
+            return;
+        }
+        const result = context.parseUri(follow.objectId);
+        if (result?.type !== "actor" || result.identifier !== SERVER_NAME) {
+            return;
+        }
+        try {
+            const follower = await follow.getActor(context);
+            if (!follower?.id) {
+                throw new Error("Follower is null");
+            }
+            await context.sendActivity(
+                { identifier: result.identifier },
+                follower,
+                new Accept({
+                    id: new URL(
+                        `#accepts/${follower.id.href}`,
+                        context.getActorUri(SERVER_NAME),
+                    ),
+                    actor: follow.objectId,
+                    object: follow,
+                }),
+            );
+            relationStore.set(follower.id.href, follow.objectId.href);
+            console.info(`[${SERVER_NAME}] Accepted follow request from ${follower.id.href}`);
+        } catch (error) {
+            console.error(`[${SERVER_NAME}] Error processing follow activity: ${follow.id}`, error);
+        }
+    })
+    .on(Undo, async (context, undo) => {
+        try {
+            const activity = await undo.getObject(context);
+            if (activity instanceof Follow && activity.id) {
+                relationStore.delete(undo.actorId.href);
+                console.info(`[${SERVER_NAME}] Follow request undone for ${undo.actorId.href}`);
+            } else {
+                console.debug(`[${SERVER_NAME}] Undo activity:`, undo);
+            }
+        } catch (error) {
+            console.error(`[${SERVER_NAME}] Error processing undo activity: ${undo.id}`, error);
+        }
+    });
 
+// Function to send a follow request to the peer server
 async function sendFollow(ctx: Context<void>, senderId: string) {
     if (!PEER_SERVER) {
-        console.error("No peer server specified");
+        console.error(`[${SERVER_NAME}] No peer server specified`);
         return;
     }
 
@@ -141,7 +155,7 @@ async function sendFollow(ctx: Context<void>, senderId: string) {
         const recipientInboxUrl = new URL(`${PEER_SERVER}/users/${PEER_SERVER_NAME}/inbox`);
         const recipient: Recipient = { id: recipientUrl, inboxId: recipientInboxUrl } as Recipient;
 
-        console.log(`[${SERVER_NAME}] Sending follow request to ${recipientUrl.href}`);
+        console.info(`[${SERVER_NAME}] Sending follow request to ${recipientUrl.href}`);
 
         const sender = { identifier: senderId };
 
@@ -155,33 +169,37 @@ async function sendFollow(ctx: Context<void>, senderId: string) {
             })
         );
 
-        console.log(`[${SERVER_NAME}] Follow request sent successfully.`);
+        console.info(`[${SERVER_NAME}] Follow request sent successfully.`);
     } catch (error) {
-        console.error(`[${SERVER_NAME}] Error sending follow request:`, error);
+        console.error(`[${SERVER_NAME}] Error sending follow request to ${PEER_SERVER}`, error);
     }
 }
 
-// Since the blog does not follow anyone, the following dispatcher is
-// implemented to return just an empty list:
+// Dispatcher for following requests
 federation.setFollowingDispatcher(
     "/users/{identifier}/following",
     async (_ctx, identifier, _cursor) => {
-        console.log(`[${SERVER_NAME}] Fetching followers for ${identifier}`);
-        return { items: [] };
+        try {
+            console.info(`[${SERVER_NAME}] Fetching following for ${identifier}`);
+            return { items: [] };
+        } catch (error) {
+            console.error(`[${SERVER_NAME}] Error fetching following for ${identifier}`, error);
+            return { items: [] }; // Return empty array in case of error
+        }
     },
 );
 
-// Start server
+// Start the server
 serve({
     fetch: behindProxy(request => federation.fetch(request, { contextData: undefined })),
     port: PORT,
 });
 
-setTimeout(async function() {
+setTimeout(async function () {
     try {
         const ctx = federation.createContext(new Request(DOMAIN), undefined);
         await sendFollow(ctx, SERVER_NAME);
-        console.log("Send follow request to other server");
+        console.info("Send follow request to the other server");
     } catch (error) {
         console.error(`[${SERVER_NAME}] Error sending initial follow request:`, error);
     }
