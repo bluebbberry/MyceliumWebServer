@@ -19,7 +19,7 @@ RUN apt-get update && \
     gnupg \
     ca-certificates \
     lsb-release && \
-    curl -sL https://deb.nodesource.com/setup_18.x | bash - && \
+    curl -fsSL https://deb.nodesource.com/setup_current.x | bash - && \
     apt-get install -y nodejs && \
     apt-get clean
 
