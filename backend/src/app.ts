@@ -23,31 +23,34 @@ const createAcceptActivity = (actorUri, followActivity) => {
 
 // Endpoint to receive follow requests
 app.post(`/users/${SERVER_NAME}/inbox`, async (req, res) => {
-    const followActivity = req.body;
 
-    // Basic validation of the Follow activity
-    if (
-        followActivity.type !== "Follow" ||
-        !followActivity.actor ||
-        !followActivity.object
-    ) {
-        return res.status(400).json({ error: "Invalid Follow Activity" });
-    }
+    const activity = req.body;
 
-    const actor = followActivity.actor; // The user who is following
-    const followedUser = followActivity.object; // The user being followed
+    console.log("Received activity:", JSON.stringify(activity, null, 2));  // Log the received activity
 
-    console.log(`${actor} is following ${followedUser}`);
+    if (activity.type === "Create" && activity.object) {
+        console.log(`Received post: ${JSON.stringify(activity.object)}`);
+        res.status(200).json({ message: "Post received" });
+    } else if (activity.type === "Follow" && activity.object && activity.actor) {
+        // Basic validation of the Follow activity
+        const actor = activity.actor; // The user who is following
+        const followedUser = activity.object; // The user being followed
 
-    // Check if the user being followed matches the current server
-    if (followedUser === `${DOMAIN}/users/${SERVER_NAME}`) {
-        followers.add(actor); // Add to followers set
+        // Check if the user being followed matches the current server
+        if (followedUser === `${DOMAIN}/users/${SERVER_NAME}`) {
+            followers.add(actor); // Add to followers set
 
-        // Send an Accept activity
-        const acceptActivity = createAcceptActivity(followedUser, followActivity);
-        res.status(200).json(acceptActivity);
+            console.log(`${actor} is following ${followedUser}`);
+
+            // Send an Accept activity
+            const acceptActivity = createAcceptActivity(followedUser, activity);
+            res.status(200).json(acceptActivity);
+        } else {
+            res.status(404).json({ error: "User not found" });
+        }
     } else {
-        res.status(404).json({ error: "User not found" });
+        console.error("Invalid post activity:", JSON.stringify(activity, null, 2));
+        res.status(400).json({ error: "Invalid post activity" });
     }
 });
 
@@ -69,6 +72,39 @@ app.get(`/users/${SERVER_NAME}`, (req, res) => {
 app.listen(PORT, () => {
     console.log(`Server running on ${DOMAIN}`);
 });
+
+// Send a post (Create activity) to the peer server
+const sendPostToPeerServer = async () => {
+    const postActivity = {
+        "@context": "https://www.w3.org/ns/activitystreams",
+        type: "Create",
+        actor: `${DOMAIN}/users/${SERVER_NAME}`,
+        object: {
+            type: "Note",
+            content: "Hello, this is a post from " + SERVER_NAME,
+        },
+    };
+
+    if (PEER_SERVER) {
+        try {
+            const response = await fetch(`${PEER_SERVER}/users/${PEER_SERVER_NAME}/inbox`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify(postActivity),
+            });
+
+            if (response.ok) {
+                console.log("Post sent to peer server successfully!");
+            } else {
+                console.error("Error sending post:", response.statusText);
+            }
+        } catch (error) {
+            console.error("Failed to send post:", error);
+        }
+    }
+};
 
 const sendFollowRequest = async () => {
     const SERVER_NAME = process.env.FEDIFY_SERVER_NAME || 'server1';
@@ -118,6 +154,7 @@ const sendFollowRequest = async () => {
 setTimeout(
     function() {
         sendFollowRequest();
+        sendPostToPeerServer();
     }, randomIntFromInterval(1000, 5000));
 
 function randomIntFromInterval(min: number, max: number) { // min and max included
