@@ -60,23 +60,26 @@ services:
 # --------------------------------------------
   fungi-backend:
     build:
-      context: ./backend/fungus-backend
+      context: ./backend
       args:
         REACT_APP_BACKEND_PORT: 5000
         REACT_APP_SEMANTIC_URL: "http://localhost:3030"
         REACT_APP_SOCIAL_URL: "https://techhub.social/@myceliumweb"
     ports:
       - 3003:3003
+      - 8000:8000
     restart: always
     environment:
       - PORT=3003
       - FEDIFY_SERVER_NAME=fungi-backend
       - PEER_SERVER=http://fungi-backend2:3004
+      - PEER_SERVER_NAME=fungi-backend2
+      - PEER_PORT=3004
     depends_on: [ fungi ]
 
   fungi-backend2:
     build:
-      context: ./backend/fungus-backend
+      context: ./backend
       args:
         REACT_APP_BACKEND_PORT: 5001
         REACT_APP_SEMANTIC_URL: "http://localhost:3030"
@@ -88,6 +91,8 @@ services:
       - PORT=3004
       - FEDIFY_SERVER_NAME=fungi-backend2
       - PEER_SERVER=http://fungi-backend:3003
+      - PEER_SERVER_NAME=fungi-backend
+      - PEER_PORT=3003
     depends_on: [ fungi2 ]
 
 # ---------------------------------------------------
