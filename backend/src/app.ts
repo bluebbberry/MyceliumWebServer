@@ -115,4 +115,11 @@ const sendFollowRequest = async () => {
 };
 
 // Trigger the follow request
-sendFollowRequest();
+setTimeout(
+    function() {
+        sendFollowRequest();
+    }, randomIntFromInterval(1000, 5000));
+
+function randomIntFromInterval(min: number, max: number) { // min and max included
+    return Math.floor(Math.random() * (max - min + 1) + min);
+}
