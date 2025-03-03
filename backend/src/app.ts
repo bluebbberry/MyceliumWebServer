@@ -1,14 +1,28 @@
 import express from "express";
 import bodyParser from "body-parser";
+import fetch from "node-fetch";
 
 const app = express();
 app.use(bodyParser.json()); // Parse incoming JSON requests
 
+const fetchFungiInfo = async () => {
+    const response = await fetch('http://' + process.env.FUNGI_SERVER_NAME + ':' + process.env.FUNGI_SERVER_PORT + '/info', { method: "GET" });
+    const data: any = await response.json();
+
+    const peerServerPort = data["info"]["PEER_SERVER_PORT"];
+    const peerServerName = data["info"]["PEER_SERVER_NAME"];
+
+    console.log("Received server information: http://" + peerServerName + ":" + peerServerPort);
+
+    return [ peerServerPort, peerServerName ];
+}
+
 const PORT = process.env.PORT || 3000;
 const SERVER_NAME = process.env.FEDIFY_SERVER_NAME || 'server1';
 const DOMAIN = `http://${SERVER_NAME}:${PORT}`;
-const PEER_SERVER = process.env.PEER_SERVER || null;
-const PEER_SERVER_NAME = process.env.PEER_SERVER_NAME || null;
+let [ peerServerPort, peerServerName ] = await fetchFungiInfo();
+const PEER_SERVER = "http://" + peerServerName + ":" + peerServerPort || null;
+const PEER_SERVER_NAME = peerServerName || null;
 const followers = new Set(); // Store the followers
 
 // Helper function to generate an 'Accept' activity
@@ -109,8 +123,6 @@ const sendPostToPeerServer = async () => {
 const sendFollowRequest = async () => {
     const SERVER_NAME = process.env.FEDIFY_SERVER_NAME || 'server1';
     const DOMAIN = `http://${SERVER_NAME}:${process.env.PORT || 3000}`;
-    const PEER_SERVER = process.env.PEER_SERVER || null;
-    const PEER_SERVER_NAME = process.env.PEER_SERVER_NAME || null;
 
     if (!PEER_SERVER || !PEER_SERVER_NAME) {
         console.error("Peer server or peer server name not set. Cannot send follow request.");
