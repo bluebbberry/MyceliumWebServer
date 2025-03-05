@@ -13,11 +13,15 @@ class MastodonClient:
         self.api_token = os.getenv("MASTODON_API_KEY")
         self.instance_url = os.getenv("MASTODON_INSTANCE_URL")
         self.nutrial_tag = os.getenv("NUTRIAL_TAG")
+        self.ap_server = os.getenv("AP_SERVER")
+        self.ap_server_port = os.getenv("AP_SERVER_PORT")
         self.ids_of_replied_statuses = []
         self.ids_of_replies = []
 
     def post_status(self, status_text):
-        url = f"{self.instance_url}/api/v1/statuses"
+        # url = f"{self.instance_url}/api/v1/statuses"
+        url = f"http://{self.ap_server}:{self.ap_server_port}/statuses"
+        logging.info("Post to: " + url)
         payload = {'status': status_text}
         headers = {
             'Authorization': f'Bearer {self.api_token}',
@@ -30,7 +34,7 @@ class MastodonClient:
             logging.info(f"Posted to Mastodon: {status_text}")
             return response.json()
         except requests.exceptions.RequestException as e:
-            print(f"Error posting status: {e}")
+            logging.error(f"Error posting status: {e}")
             return None
 
     def fetch_latest_statuses(self, model, hashtag):
