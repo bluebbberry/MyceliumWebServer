@@ -35,6 +35,12 @@ const createAcceptActivity = (actorUri, followActivity) => {
     };
 };
 
+app.post("/statuses", async (req, res) => {
+    const reqBody = req.body;
+    await sendPostToPeerServer(reqBody["status"]);
+    res.status(200).json({ message: "Posted to activity pub server." });
+});
+
 // Endpoint to receive follow requests
 app.post(`/users/${SERVER_NAME}/inbox`, async (req, res) => {
 
@@ -88,14 +94,14 @@ app.listen(PORT, () => {
 });
 
 // Send a post (Create activity) to the peer server
-const sendPostToPeerServer = async () => {
+const sendPostToPeerServer = async (content: string) => {
     const postActivity = {
         "@context": "https://www.w3.org/ns/activitystreams",
         type: "Create",
         actor: `${DOMAIN}/users/${SERVER_NAME}`,
         object: {
             type: "Note",
-            content: "Hello, this is a post from " + SERVER_NAME,
+            content: content,
         },
     };
 
@@ -166,7 +172,7 @@ const sendFollowRequest = async () => {
 setTimeout(
     function() {
         sendFollowRequest();
-        sendPostToPeerServer();
+        sendPostToPeerServer("Hello, this is a post from " + SERVER_NAME);
     }, randomIntFromInterval(1000, 5000));
 
 function randomIntFromInterval(min: number, max: number) { // min and max included
