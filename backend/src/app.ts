@@ -5,6 +5,8 @@ import fetch from "node-fetch";
 const app = express();
 app.use(bodyParser.json()); // Parse incoming JSON requests
 
+let receivedPosts: any[] = []; // Store received posts
+
 const fetchFungiInfo = async () => {
     const response = await fetch('http://' + process.env.FUNGI_SERVER_NAME + ':' + process.env.FUNGI_SERVER_PORT + '/info', { method: "GET" });
     const data: any = await response.json();
@@ -50,6 +52,7 @@ app.post(`/users/${SERVER_NAME}/inbox`, async (req, res) => {
 
     if (activity.type === "Create" && activity.object) {
         console.log(`Received post: ${JSON.stringify(activity.object)}`);
+        receivedPosts.push({text: activity.object.content}); // Store received post
         res.status(200).json({ message: "Post received" });
     } else if (activity.type === "Follow" && activity.object && activity.actor) {
         // Basic validation of the Follow activity
@@ -77,6 +80,15 @@ app.post(`/users/${SERVER_NAME}/inbox`, async (req, res) => {
 // Endpoint to view the list of followers (for testing)
 app.get("/followers", (req, res) => {
     res.json(Array.from(followers));
+});
+
+app.get("/statuses", (req, res) => {
+    res.header("Access-Control-Allow-Origin", "*");
+    res.header('Access-Control-Allow-Methods', 'DELETE, PUT');
+    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+    res.json({ statuses: receivedPosts });
+    receivedPosts = [];
+    res.sendStatus(200);
 });
 
 // Endpoint to view the current server user profile

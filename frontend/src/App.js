@@ -79,6 +79,25 @@ function App() {
     fetchProfileImageCode();
   }, []);
 
+  useEffect(() => {
+    const fetchExternalMessages = async () => {
+      try {
+        const apPort = process.env.REACT_APP_AP_PORT
+        const response = await axios.get(`http://127.0.0.1:${apPort}/statuses`);
+        if (response.data.statuses != null && response.data.statuses.length > 0) {
+          console.log("Received statuses:", response.data.statuses);
+          setMessages((prevMessages) => [...prevMessages, ...response.data.statuses]);
+        } else {
+          console.log("No new statuses");
+        }
+      } catch (error) {
+        console.error('Error fetching external messages:', error);
+      }
+    };
+    const interval = setInterval(fetchExternalMessages, 5000);
+    return () => clearInterval(interval);
+  }, []);
+
   // Fetch model fungi and all fungi (from earlier trainings)
   useEffect(() => {
     const loadFungiData = async () => {
