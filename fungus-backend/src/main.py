@@ -191,7 +191,7 @@ def get_fungus_info():
     info = {
         "name": music_service.fungus_name,
         "PEER_SERVER_PORT": os.getenv("PEER_SERVER_PORT", "3003"),
-        "PEER_SERVER_NAME": os.getenv("PEER_SERVER_NAME", "fungi-backend"),
+        "PEER_SERVER_NAME": os.getenv("PEER_SERVER_NAME", "ap-backend"),
     }
     return jsonify({"info": info})
 
