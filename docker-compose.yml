@@ -3,31 +3,31 @@ services:
 # --------------------------------------------------------
 # ------------ FUNGI FUNCTIONALITY CONTAINER -------------
 # --------------------------------------------------------
-  fungi:
-    build: .
+  fungi-backend:
+    build: fungus-backend
     restart: always
     environment:
       - PORT=5000
       - FRONTEND_PORT=3000
       - FUNGUS_ID=1
       - PEER_SERVER_PORT=3004
-      - PEER_SERVER_NAME=fungi-backend2
-      - AP_SERVER=fungi-backend
+      - PEER_SERVER_NAME=ap-backend2
+      - AP_SERVER=ap-backend
       - AP_SERVER_PORT=3003
     ports:
       - 5000:5000
     depends_on: [ fuseki ]
 
-  fungi2:
-    build: .
+  fungi-backend2:
+    build: fungus-backend
     restart: always
     environment:
       - PORT=5001
       - FRONTEND_PORT=3001
       - FUNGUS_ID=2
       - PEER_SERVER_PORT=3003
-      - PEER_SERVER_NAME=fungi-backend
-      - AP_SERVER=fungi-backend2
+      - PEER_SERVER_NAME=ap-backend
+      - AP_SERVER=ap-backend2
       - AP_SERVER_PORT=3004
     ports:
       - 5001:5001
@@ -36,9 +36,9 @@ services:
 # -------------------------------------------------
 # ------------ ACTIVITY PUB CONTAINER -------------
 # -------------------------------------------------
-  fungi-backend:
+  ap-backend:
     build:
-      context: ./backend
+      context: ap-backend
       args:
         REACT_APP_BACKEND_PORT: 5000
         REACT_APP_SEMANTIC_URL: "http://localhost:3030"
@@ -49,14 +49,14 @@ services:
     restart: always
     environment:
       - PORT=3003
-      - FEDIFY_SERVER_NAME=fungi-backend
-      - FUNGI_SERVER_NAME=fungi
+      - FEDIFY_SERVER_NAME=ap-backend
+      - FUNGI_SERVER_NAME=fungi-backend
       - FUNGI_SERVER_PORT=5000
-    depends_on: [ fungi ]
+    depends_on: [ fungi-backend ]
 
-  fungi-backend2:
+  ap-backend2:
     build:
-      context: ./backend
+      context: ap-backend
       args:
         REACT_APP_BACKEND_PORT: 5001
         REACT_APP_SEMANTIC_URL: "http://localhost:3030"
@@ -66,10 +66,10 @@ services:
     restart: always
     environment:
       - PORT=3004
-      - FEDIFY_SERVER_NAME=fungi-backend2
-      - FUNGI_SERVER_NAME=fungi2
+      - FEDIFY_SERVER_NAME=ap-backend2
+      - FUNGI_SERVER_NAME=fungi-backend2
       - FUNGI_SERVER_PORT=5001
-    depends_on: [ fungi2 ]
+    depends_on: [ fungi-backend2 ]
 
 # ---------------------------------------------------
 # ------------ KNOWLEDGE BASE CONTAINER -------------
@@ -99,7 +99,7 @@ services:
     restart: always
     environment:
       - PORT=3000
-    depends_on: [ fungi ]
+    depends_on: [ fungi-backend ]
 
   fungi-frontend2:
     build:
@@ -114,4 +114,4 @@ services:
     restart: always
     environment:
       - PORT=3001
-    depends_on: [ fungi2 ]
+    depends_on: [ fungi-backend2 ]
