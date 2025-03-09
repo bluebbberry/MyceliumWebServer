@@ -120,7 +120,7 @@ function App() {
   const handleSendMessage = async () => {
     if (newMessage.trim()) {
       // Add user message to chat
-      const userMessage = { sender: 'user', text: newMessage };
+      const userMessage = { sender: 'user', text: newMessage, actor: 'Me' };
       setMessages([...messages, userMessage]);
 
       try {
@@ -176,16 +176,23 @@ function App() {
             </div>
           )}
 
-          {/* Chat Messages */}
-          <div className="messages">
-            {messages.map((message, index) => (
-              <div
-                key={index}
-                className={`message ${message.sender === 'user' ? 'user' : 'bot'}`}
-              >
-                {message.text}
-              </div>
-            ))}
+          {/* Feed */}
+          <div className="feed-container">
+            <div className="feed">
+              {messages.map((msg, index) => (
+                  <div key={index} className="message-card">
+                    <div className="message-info">
+                      <span className="message-sender">{msg.actor}</span>
+                    </div>
+                    <div
+                        key={index}
+                        className={`message ${msg.sender === 'user' ? 'user' : 'bot'}`}
+                    >
+                      {msg.text}
+                    </div>
+                  </div>
+              ))}
+            </div>
           </div>
 
           {/* Input Field */}

@@ -1,10 +1,9 @@
 /* App.css */
 .chat-container {
   display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
-  background-color: #f0f0f0;
+  flex-direction: column;
+  height: 100vh; /* Full height of the viewport */
+  overflow: hidden;
 }
 
 .profile-image-container {
@@ -14,14 +13,11 @@
 }
 
 .chat-box {
-  width: 400px;
-  max-width: 100%;
-  background-color: white;
-  border-radius: 8px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  padding: 20px;
+  flex: 1;
   display: flex;
   flex-direction: column;
+  overflow: hidden;
+  width: 600px;
 }
 
 .messages {
@@ -40,6 +36,8 @@
 
 .input-container {
   display: flex;
+  padding: 10px;
+  background: #fff;
 }
 
 .message-input {
@@ -97,6 +95,12 @@
 
 .fungus-card:hover {
   transform: translateY(-2px);
+}
+
+.fungus-section {
+  flex-shrink: 0;
+  overflow-y: auto;
+  max-height: 40vh; /* Adjust this height as needed */
 }
 
 .fungus-card a {
@@ -167,3 +171,114 @@
 .dropdown:hover .dropdown-content {
   display: block;
 }
+
+/* General Styles */
+body {
+  font-family: Arial, sans-serif;
+  background-color: #f4f4f9;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
+.feed-container {
+  height: 300px; /* Adjust height as needed */
+  overflow-y: auto;
+  border: 1px solid #ccc; /* Optional: for better visibility */
+  padding: 10px;
+  background-color: #f9f9f9;
+}
+
+.feed {
+  display: flex;
+  flex-direction: column;
+}
+
+h1 {
+  font-size: 20px;
+  text-align: center;
+  color: #333;
+}
+
+/* Profile Header */
+.profile-header {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 10px;
+}
+
+.profile-image {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  border: 2px solid #ddd;
+}
+
+/* Message Input */
+.message-input-container {
+  display: flex;
+  padding: 10px;
+  background: #fff;
+}
+
+.message-input-container input {
+  flex: 1;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+.message-input-container button {
+  padding: 10px 15px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.message-input-container button:hover {
+  background-color: #0056b3;
+}
+
+/* Feed Messages */
+
+.message-card {
+  background: #fff;
+  padding: 10px;
+  border-radius: 5px;
+  box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.message-info {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  color: #555;
+  margin-bottom: 5px;
+}
+
+.message-text {
+  font-size: 14px;
+  color: #333;
+}
+
+/* Links */
+.links {
+  margin-top: 20px;
+  text-align: center;
+}
+
+.links a {
+  margin: 0 10px;
+  text-decoration: none;
+  color: #007bff;
+}
+
+.links a:hover {
+  text-decoration: underline;
+}
+

@@ -29,6 +29,17 @@ Based on that, it builds on top of federated, peer-to-peer AI training, e.g. flo
 
 For more background-information about the project's mission statement, see the [Wiki](https://github.com/bluebbberry/MusicRecommendationFungus/wiki).
 
+In general the "Fungiverse" (another word for the mycelium web) is a part of the Fediverse, but not completely (models and knowledge graphs are not part of the Fediverse).
+Its more like the Fungiverse is a different section of the Fediverse, in which AI bots are much more prominent and which reaches far beyond the Fediverse itself.
+
+Key difference between fungus actors and usual, human actors in the Fedi/Fungiverse:
+
+- Hashtags are used for collaboration and the implementation of protocols
+- Fungus Nodes actors can "merge" themselves by training a model together, which is not possible for human actors (or more broadly speaking: actors with centralized intelligence). The union between a number of fungus nodes that train a model together and the model itself is referred here as a "fungus".
+
+Fungi will probably have their own interesting properties to observe and develop.
+To provide a healthy, beneficial interrelation between centralized and decentralized intelligent actors will be a key goal when realizing the Fungiverse.
+
 ## Requirements
 
 - Python 3.8+
