@@ -40,6 +40,7 @@ const createAcceptActivity = (actorUri, followActivity) => {
 app.post("/statuses", async (req, res) => {
     const reqBody = req.body;
     await sendPostToPeerServer(reqBody["status"]);
+    receivedPosts.push({ text: reqBody["status"] });
     res.status(200).json({ message: "Posted to activity pub server." });
 });
 
