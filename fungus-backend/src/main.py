@@ -97,6 +97,7 @@ class MusicRecommendationFungus:
                 self.evolve_behavior(feedback)
 
                 logging.info("[SLEEP] Sleeping for " + str(self.sleep_time))
+                self.mastodon_client.post_status(f"[SPORE] Sleeping for {str(self.sleep_time)}.")
                 time.sleep(self.sleep_time)
                 i = i + 1
             except Exception as e:
