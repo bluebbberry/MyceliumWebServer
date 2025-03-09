@@ -9,16 +9,25 @@ import json
 load_dotenv()
 logging.basicConfig(level=logging.INFO)
 
+FUNGUS_ID = int(os.getenv("FUNGUS_ID"))
+AP_BACKEND_NAME = os.getenv("AP_BACKEND_NAME") + str(FUNGUS_ID)
+AP_BACKEND_PORT = int(os.getenv("AP_BACKEND_PORT")) + FUNGUS_ID
+
+MASTODON_API_KEY = os.getenv("MASTODON_API_KEY")
+MASTODON_INSTANCE_URL = os.getenv("MASTODON_INSTANCE_URL")
+NUTRIAL_TAG = os.getenv("NUTRIAL_TAG")
+MYCELIAL_HASHTAG = os.getenv("MYCELIAL_TAG")
+
 class MastodonClient:
     def __init__(self, musicRecommendationFungus):
-        self.api_token = os.getenv("MASTODON_API_KEY")
-        self.instance_url = os.getenv("MASTODON_INSTANCE_URL")
-        self.nutrial_tag = os.getenv("NUTRIAL_TAG")
-        self.ap_server = os.getenv("AP_SERVER")
-        self.ap_server_port = os.getenv("AP_SERVER_PORT")
+        self.musicRecommendationFungus = musicRecommendationFungus
+        self.api_token = MASTODON_API_KEY
+        self.instance_url = MASTODON_INSTANCE_URL
+        self.nutrial_tag = NUTRIAL_TAG
+        self.ap_server = AP_BACKEND_NAME
+        self.ap_server_port = AP_BACKEND_PORT
         self.ids_of_replied_statuses = []
         self.ids_of_replies = []
-        self.musicRecommendationFungus = musicRecommendationFungus
 
     def post_status(self, status_text):
         # url = f"{self.instance_url}/api/v1/statuses"
@@ -71,7 +80,7 @@ class MastodonClient:
 
     def get_statuses_from_random_mycelial_tag(self):
         messages = []
-        random_mycelial_tag = random.choice(os.getenv("MYCELIAL_TAG").split(";"))
+        random_mycelial_tag = random.choice(MYCELIAL_HASHTAG.split(";"))
         statuses = self.fetch_latest_statuses(None, random_mycelial_tag)
         for status in statuses:
             messages.append(status["content"])

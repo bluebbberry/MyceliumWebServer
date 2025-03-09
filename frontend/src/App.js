@@ -6,19 +6,21 @@ function App() {
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState('');
   const [fungusName, setFungusName] = useState('');
-  const [modelInfo, setModelInfo] = useState(null);  // Model info (name and fungi that train it)
-  const [allFungi, setAllFungi] = useState([]);     // All fungi known to the fungus
+  const [modelInfo, setModelInfo] = useState(null);  // Model info (name and fungus that train it)
+  const [allFungi, setAllFungi] = useState([]);     // All fungus known to the fungus
   const [profileImage, setProfileImage] = useState('');
 
   const socialUrl = process.env.REACT_APP_SOCIAL_URL;
   const semanticUrl = process.env.REACT_APP_SEMANTIC_URL;
+  const FUNGUS_ID = parseInt(process.env.REACT_APP_FUNGUS_ID);
+  const FUNGUS_BACKEND_PORT = parseInt(process.env.REACT_APP_FUNGUS_BACKEND_PORT) + FUNGUS_ID;
+  const AP_BACKEND_PORT = parseInt(process.env.REACT_APP_AP_FUNGUS_BACKEND_PORT) + FUNGUS_ID;
 
   // Fetch fungus name on component mount
   useEffect(() => {
     const fetchFungusName = async () => {
       try {
-        const backendPort = process.env.REACT_APP_BACKEND_PORT;
-        const response = await axios.get(`http://127.0.0.1:${backendPort}/info`);
+        const response = await axios.get(`http://127.0.0.1:${FUNGUS_BACKEND_PORT}/info`);
         setFungusName(response.data.info.name);
       } catch (error) {
         console.error('Error fetching fungus name:', error);
@@ -67,8 +69,7 @@ function App() {
   useEffect(() => {
     const fetchProfileImageCode = async () => {
       try {
-        const backendPort = process.env.REACT_APP_BACKEND_PORT;
-        const response = await axios.get(`http://127.0.0.1:${backendPort}/random-profile`);
+        const response = await axios.get(`http://127.0.0.1:${FUNGUS_BACKEND_PORT}/random-profile`);
         const code = response.data.code;
         const image = generatePsychedelicImage(code);
         setProfileImage(image);
@@ -82,8 +83,7 @@ function App() {
   useEffect(() => {
     const fetchExternalMessages = async () => {
       try {
-        const apPort = process.env.REACT_APP_AP_PORT
-        const response = await axios.get(`http://127.0.0.1:${apPort}/statuses`);
+        const response = await axios.get(`http://127.0.0.1:${AP_BACKEND_PORT}/statuses`);
         if (response.data.statuses != null && response.data.statuses.length > 0) {
           console.log("Received statuses:", response.data.statuses);
           setMessages((prevMessages) => [...prevMessages, ...response.data.statuses]);
@@ -98,16 +98,15 @@ function App() {
     return () => clearInterval(interval);
   }, []);
 
-  // Fetch model fungi and all fungi (from earlier trainings)
+  // Fetch model fungus and all fungi (from earlier trainings)
   useEffect(() => {
     const loadFungiData = async () => {
       try {
-        const backendPort = process.env.REACT_APP_BACKEND_PORT;
-        const response = await axios.get(`http://127.0.0.1:${backendPort}/fungi`);
+        const response = await axios.get(`http://127.0.0.1:${FUNGUS_BACKEND_PORT}/fungi`);
         setModelInfo(response.data.model || null);  // Model info (name and fungi that train it)
         setAllFungi(response.data.allFungi || []);  // All fungi known to the fungus
       } catch (error) {
-        console.error('Error loading fungi data:', error);
+        console.error('Error loading fungus data:', error);
         setModelInfo(null);
         setAllFungi([]);
       }
@@ -125,8 +124,7 @@ function App() {
 
       try {
         // Send a GET request to the backend for recommendations
-        const backendPort = process.env.REACT_APP_BACKEND_PORT;
-        const response = await axios.get(`http://127.0.0.1:${backendPort}/recommend`, {
+        const response = await axios.get(`http://127.0.0.1:${FUNGUS_BACKEND_PORT}/recommend`, {
           params: { song_name: newMessage },
         });
 

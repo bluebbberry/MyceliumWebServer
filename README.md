@@ -9,7 +9,7 @@ Currently, the mycelium web server consists of four parts:
 - Frontend, which makes the fungus' model available to the user and let's them browse the mycelium web
 - A Knowledge Base (in this case Jena Fuseki), which stores the fungus' knowledge and its trained model
 
-![fungi-architecture.png](docs/fungi-architecture.png)
+![fungus-architecture.png](docs/fungus-architecture.png)
 
 A demo of browsing a mycelium web with two fungi can be seen [here](https://makertube.net/w/doRDfT2ZibYaF9F7EiGCoK).
 
