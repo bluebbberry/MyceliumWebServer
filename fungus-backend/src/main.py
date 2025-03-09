@@ -26,6 +26,16 @@ logging.basicConfig(
 app = Flask(__name__)
 CORS(app)
 
+FUNGUS_ID = int(os.getenv("FUNGUS_ID", 0))
+NUM_OF_FUNGI = int(os.getenv("NUM_OF_FUNGI", 1))
+FUNGUS_FRONTEND_PORT = int(os.getenv("FUNGUS_FRONTEND_PORT", 3000)) + FUNGUS_ID
+FUNGUS_BACKEND_PORT = int(os.getenv("FUNGUS_BACKEND_PORT", 5000)) + FUNGUS_ID
+PEER_AP_BACKEND_PORT = int(os.getenv("PEER_AP_BACKEND_PORT", 3003)) + ((NUM_OF_FUNGI - 1) - FUNGUS_ID)
+PEER_AP_BACKEND_NAME = os.getenv("PEER_AP_BACKEND_NAME", "ap-backend") + "" + ((NUM_OF_FUNGI - 1) - FUNGUS_ID)
+
+FEEDBACK_THRESHOLD = float(os.getenv("FEEDBACK_THRESHOLD", 0.5))
+SLEEP_TIME = float(os.getenv("SLEEP_TIME", 42300))
+
 class MusicRecommendationFungus:
     def __init__(self):
         logging.info("[INIT] Initializing Music Recommendation instance")
@@ -34,12 +44,12 @@ class MusicRecommendationFungus:
         self.knowledge_graph.insert_songs_from_csv('songs.csv')
         self.machine_learning_service = MLService(self.knowledge_graph, user_ratings_csv='user_ratings.csv')
         self.knowledge_graph.insert_model_state("my-model", self.machine_learning_service.model.get_state())
-        self.feedback_threshold = float(os.getenv("FEEDBACK_THRESHOLD", 0.5))
+        self.feedback_threshold = FEEDBACK_THRESHOLD
         self.fungus_name = self.generate_fungus_name()
         self.profile_picture_code = self.generate_random_code()
-        self.knowledge_graph.insert_fungus_data(os.getenv("FUNGUS_ID", 1), self.fungus_name, os.getenv("FUNGUS_FRONTEND_PORT", 3000))
+        self.knowledge_graph.insert_fungus_data(FUNGUS_ID, self.fungus_name, FUNGUS_FRONTEND_PORT)
         # default sleep time: 42300
-        self.sleep_time = float(os.getenv("SLEEP_TIME", 42300))
+        self.sleep_time = SLEEP_TIME
         logging.info(f"[CONFIG] Feedback threshold set to {self.feedback_threshold}")
 
     def generate_fungus_name(self):
@@ -202,14 +212,14 @@ def get_random_profile():
 def get_fungus_info():
     info = {
         "name": music_service.fungus_name,
-        "PEER_AP_BACKEND_PORT": os.getenv("PEER_AP_BACKEND_PORT", "3003"),
-        "PEER_AP_BACKEND_NAME": os.getenv("PEER_AP_BACKEND_NAME", "ap-backend"),
+        "PEER_AP_BACKEND_PORT": PEER_AP_BACKEND_PORT,
+        "PEER_AP_BACKEND_NAME": PEER_AP_BACKEND_NAME,
     }
     return jsonify({"info": info})
 
 
 if __name__ == "__main__":
-    port = int(os.getenv("FUNGUS_BACKEND_PORT", 5000))
+    port = FUNGUS_BACKEND_PORT
     logging.info("[STARTUP] Launching Flask app for Music Recommendation Service on port " + str(port))
     threading.Thread(target=lambda: app.run(host="0.0.0.0", port=int(port), debug=True, use_reloader=False)).start()
     music_service.start()

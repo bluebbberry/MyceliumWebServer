@@ -1,34 +1,45 @@
 import express from "express";
 import bodyParser from "body-parser";
 import fetch from "node-fetch";
+import {parseNumber} from "@fedify/fedify/types/deps/jsr.io/@std/semver/1.0.3/_shared";
 
 const app = express();
 app.use(bodyParser.json()); // Parse incoming JSON requests
 
 let receivedPosts: any[] = []; // Store received posts
 
+let FUNGUS_ID: any = process.env.FUNGUS_ID
+if (!FUNGUS_ID) {
+    console.error("No FUNGI ID env var defined");
+    FUNGUS_ID = 0;
+}
+const NUM_OF_FUNGI: any = process.env.NUM_OF_FUNGI;
+const FUNGUS_BACKEND_NAME = process.env.FUNGUS_BACKEND_NAME + "" + FUNGUS_ID;
+const FUNGUS_BACKEND_PORT = parseNumber(process.env.FUNGUS_BACKEND_PORT) + FUNGUS_ID;
+const PORT: number = parseNumber((process.env.AP_BACKEND_PORT) || "3000") + FUNGUS_ID;
+const SERVER_NAME = (process.env.AP_BACKEND_NAME || 'server1') + FUNGUS_ID;
+const DOMAIN = `http://${SERVER_NAME}:${PORT}`;
+
 const fetchFungusInfo = async () => {
-    const response = await fetch('http://' + process.env.FUNGUS_BACKEND_NAME + ':' + process.env.FUNGUS_BACKEND_PORT + '/info', { method: "GET" });
+    const response = await fetch('http://' + FUNGUS_BACKEND_NAME + ':' + FUNGUS_BACKEND_PORT + '/info', { method: "GET" });
     const data: any = await response.json();
 
-    const peerServerPort = data["info"]["PEER_SERVER_PORT"];
-    const peerServerName = data["info"]["PEER_SERVER_NAME"];
+    const peerServerPort: number = parseNumber(data["info"]["PEER_SERVER_PORT"]) + ((NUM_OF_FUNGI - 1) - FUNGUS_ID);
+    const peerServerName = data["info"]["PEER_SERVER_NAME"] + ((NUM_OF_FUNGI - 1) - FUNGUS_ID);
 
     console.log("Received server information: http://" + peerServerName + ":" + peerServerPort);
 
     return [ peerServerPort, peerServerName ];
 }
 
-const PORT = process.env.AP_BACKEND_PORT || 3000;
-const SERVER_NAME = process.env.AP_BACKEND_NAME || 'server1';
-const DOMAIN = `http://${SERVER_NAME}:${PORT}`;
 let [ peerServerPort, peerServerName ] = await fetchFungusInfo();
 const PEER_SERVER = "http://" + peerServerName + ":" + peerServerPort || null;
 const PEER_SERVER_NAME = peerServerName || null;
+
 const followers = new Set(); // Store the followers
 
 // Helper function to generate an 'Accept' activity
-const createAcceptActivity = (actorUri, followActivity) => {
+const createAcceptActivity = (actorUri: any, followActivity: any) => {
     return {
         "@context": "https://www.w3.org/ns/activitystreams",
         type: "Accept",

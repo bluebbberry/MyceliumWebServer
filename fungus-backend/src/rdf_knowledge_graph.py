@@ -12,8 +12,10 @@ import pandas as pd
 load_dotenv()
 logging.basicConfig(level=logging.INFO)
 
+FUSEKI_SERVER_URL = os.getenv("FUSEKI_SERVER_URL")
+
 class RDFKnowledgeGraph:
-    def __init__(self, mastodon_client, fuseki_url=os.getenv("FUSEKI_SERVER_URL"), dataset="my-knowledge-base"):
+    def __init__(self, mastodon_client, fuseki_url=FUSEKI_SERVER_URL, dataset="my-knowledge-base"):
         self.update_url = f"{fuseki_url}/{dataset}/update"
         self.query_url = f"{fuseki_url}/{dataset}/query"
         self.fuseki_url = fuseki_url + "/" + dataset
@@ -380,7 +382,7 @@ class RDFKnowledgeGraph:
             self.fuseki_url = link_to_model
         else:
             # default to fuseki server
-            self.fuseki_url = os.getenv("FUSEKI_SERVER_URL")
+            self.fuseki_url = FUSEKI_SERVER_URL
 
     def is_json(self, myjson):
       try:

@@ -3,17 +3,12 @@ services:
 # --------------------------------------------------------
 # ------------ FUNGUS FUNCTIONALITY CONTAINER ------------
 # --------------------------------------------------------
-  fungus-backend:
+  fungus-backend1:
     build: fungus-backend
     restart: always
     environment:
-      - FUNGUS_BACKEND_PORT=5000
-      - FUNGUS_FRONTEND_PORT=3000
-      - FUNGUS_ID=1
-      - PEER_AP_BACKEND_NAME=ap-backend2
-      - PEER_AP_BACKEND_PORT=3004
-      - AP_BACKEND_NAME=ap-backend
-      - AP_BACKEND_PORT=3003
+      - FUNGUS_ID=0
+    env_file: ".env"
     ports:
       - 5000:5000
     depends_on: [ fuseki ]
@@ -22,13 +17,8 @@ services:
     build: fungus-backend
     restart: always
     environment:
-      - FUNGUS_BACKEND_PORT=5001
-      - FUNGUS_FRONTEND_PORT=3001
-      - FUNGUS_ID=2
-      - PEER_AP_BACKEND_NAME=ap-backend
-      - PEER_AP_BACKEND_PORT=3003
-      - AP_BACKEND_NAME=ap-backend2
-      - AP_BACKEND_PORT=3004
+      - FUNGUS_ID=1
+    env_file: ".env"
     ports:
       - 5001:5001
     depends_on: [ fuseki ]
@@ -36,18 +26,16 @@ services:
 # -------------------------------------------------
 # ------------ ACTIVITY PUB CONTAINER -------------
 # -------------------------------------------------
-  ap-backend:
+  ap-backend1:
     build:
       context: ap-backend
     ports:
       - 3003:3003
     restart: always
     environment:
-      - AP_BACKEND_PORT=3003
-      - AP_BACKEND_NAME=ap-backend
-      - FUNGUS_BACKEND_NAME=fungus-backend
-      - FUNGUS_BACKEND_PORT=5000
-    depends_on: [ fungus-backend ]
+      - FUNGUS_ID=0
+    env_file: ".env"
+    depends_on: [ fungus-backend1 ]
 
   ap-backend2:
     build:
@@ -56,10 +44,8 @@ services:
       - 3004:3004
     restart: always
     environment:
-      - AP_BACKEND_PORT=3004
-      - AP_BACKEND_NAME=ap-backend2
-      - FUNGUS_BACKEND_NAME=fungus-backend2
-      - FUNGUS_BACKEND_PORT=5001
+      - FUNGUS_ID=1
+    env_file: ".env"
     depends_on: [ fungus-backend2 ]
 
 # ---------------------------------------------------
@@ -77,32 +63,38 @@ services:
 # ---------------------------------------------
 # ------------ FRONTEND CONTAINER -------------
 # ---------------------------------------------
-  fungus-frontend:
+  fungus-frontend1:
     build:
       context: ./frontend
       args:
-        REACT_APP_FUNGUS_BACKEND_PORT: 5000
+        REACT_APP_FUNGUS_ID: 0
+        REACT_APP_FUNGUS_BACKEND_PORT: ${FUNGUS_BACKEND_PORT}
         REACT_APP_SEMANTIC_URL: "http://localhost:3030"
         REACT_APP_SOCIAL_URL: "https://techhub.social/@myceliumweb"
-        REACT_APP_AP_BACKEND_PORT: 3003
+        REACT_APP_AP_BACKEND_PORT: ${AP_BACKEND_PORT}
     ports:
       - 3000:3000
     restart: always
+    env_file: ".env"
     environment:
       - PORT=3000
-    depends_on: [ fungus-backend ]
+      - FUNGUS_ID=0
+    depends_on: [ fungus-backend1 ]
 
   fungus-frontend2:
     build:
       context: ./frontend
       args:
-        REACT_APP_FUNGUS_BACKEND_PORT: 5001
+        REACT_APP_FUNGUS_ID: 1
+        REACT_APP_FUNGUS_BACKEND_PORT: ${FUNGUS_BACKEND_PORT}
         REACT_APP_SEMANTIC_URL: "http://localhost:3030"
         REACT_APP_SOCIAL_URL: "https://techhub.social/@myceliumweb"
-        REACT_APP_AP_BACKEND_PORT: 3004
+        REACT_APP_AP_BACKEND_PORT: ${AP_BACKEND_PORT}
     ports:
       - 3001:3001
     restart: always
+    env_file: ".env"
     environment:
       - PORT=3001
+      - FUNGUS_ID=1
     depends_on: [ fungus-backend2 ]
