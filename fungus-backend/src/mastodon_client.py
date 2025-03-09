@@ -10,7 +10,7 @@ load_dotenv()
 logging.basicConfig(level=logging.INFO)
 
 FUNGUS_ID = int(os.getenv("FUNGUS_ID"))
-AP_BACKEND_NAME = os.getenv("AP_BACKEND_NAME") + "" + FUNGUS_ID
+AP_BACKEND_NAME = os.getenv("AP_BACKEND_NAME") + str(FUNGUS_ID)
 AP_BACKEND_PORT = int(os.getenv("AP_BACKEND_PORT")) + FUNGUS_ID
 
 MASTODON_API_KEY = os.getenv("MASTODON_API_KEY")
