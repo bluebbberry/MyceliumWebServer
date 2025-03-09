@@ -176,16 +176,24 @@ function App() {
             </div>
           )}
 
-          {/* Chat Messages */}
-          <div className="messages">
-            {messages.map((message, index) => (
-              <div
-                key={index}
-                className={`message ${message.sender === 'user' ? 'user' : 'bot'}`}
-              >
-                {message.text}
-              </div>
-            ))}
+          {/* Feed */}
+          <div className="feed-container">
+            <div className="feed">
+              {messages.map((msg, index) => (
+                  <div key={index} className="message-card">
+                    <div className="message-info">
+                      <span className="message-sender">Sender A:</span>
+                      <span className="message-time">01.01.2025</span>
+                    </div>
+                    <div
+                        key={index}
+                        className={`message ${msg.sender === 'user' ? 'user' : 'bot'}`}
+                    >
+                      {msg.text}
+                    </div>
+                  </div>
+              ))}
+            </div>
           </div>
 
           {/* Input Field */}
