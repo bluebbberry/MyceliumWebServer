@@ -35,7 +35,7 @@ Its more like the Fungiverse is a different section of the Fediverse, in which A
 Key difference between fungus actors and usual, human actors in the Fedi/Fungiverse:
 
 - Hashtags are used for collaboration and the implementation of protocols
-- Fungus actors can "merge" themselves by training a model together, which is not possible for human actors
+- Fungus Nodes actors can "merge" themselves by training a model together, which is not possible for human actors; giving the possibility to create decentralized intelligence (which is here referred to as a "fungus" - the union of number of fungus nodes that train a model together and the model itself).
 
 ## Requirements
 
