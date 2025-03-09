@@ -29,7 +29,7 @@ CORS(app)
 class MusicRecommendationFungus:
     def __init__(self):
         logging.info("[INIT] Initializing Music Recommendation instance")
-        self.mastodon_client = MastodonClient()
+        self.mastodon_client = MastodonClient(self)
         self.knowledge_graph = RDFKnowledgeGraph(mastodon_client=self.mastodon_client)
         self.knowledge_graph.insert_songs_from_csv('songs.csv')
         self.machine_learning_service = MLService(self.knowledge_graph, user_ratings_csv='user_ratings.csv')

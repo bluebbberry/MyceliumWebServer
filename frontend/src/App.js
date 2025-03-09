@@ -120,7 +120,7 @@ function App() {
   const handleSendMessage = async () => {
     if (newMessage.trim()) {
       // Add user message to chat
-      const userMessage = { sender: 'user', text: newMessage };
+      const userMessage = { sender: 'user', text: newMessage, actor: 'Me' };
       setMessages([...messages, userMessage]);
 
       try {
@@ -182,8 +182,7 @@ function App() {
               {messages.map((msg, index) => (
                   <div key={index} className="message-card">
                     <div className="message-info">
-                      <span className="message-sender">Sender A:</span>
-                      <span className="message-time">01.01.2025</span>
+                      <span className="message-sender">{msg.actor}</span>
                     </div>
                     <div
                         key={index}

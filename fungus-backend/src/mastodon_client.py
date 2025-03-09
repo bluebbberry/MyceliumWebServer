@@ -9,7 +9,7 @@ load_dotenv()
 logging.basicConfig(level=logging.INFO)
 
 class MastodonClient:
-    def __init__(self):
+    def __init__(self, musicRecommendationFungus):
         self.api_token = os.getenv("MASTODON_API_KEY")
         self.instance_url = os.getenv("MASTODON_INSTANCE_URL")
         self.nutrial_tag = os.getenv("NUTRIAL_TAG")
@@ -17,12 +17,13 @@ class MastodonClient:
         self.ap_server_port = os.getenv("AP_SERVER_PORT")
         self.ids_of_replied_statuses = []
         self.ids_of_replies = []
+        self.musicRecommendationFungus = musicRecommendationFungus
 
     def post_status(self, status_text):
         # url = f"{self.instance_url}/api/v1/statuses"
         url = f"http://{self.ap_server}:{self.ap_server_port}/statuses"
         logging.info("Post to: " + url)
-        payload = {'status': status_text}
+        payload = {'status': status_text, "actor": self.musicRecommendationFungus.fungus_name}
         headers = {
             'Authorization': f'Bearer {self.api_token}',
             'Content-Type': 'application/json'

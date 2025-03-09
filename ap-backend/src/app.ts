@@ -40,7 +40,7 @@ const createAcceptActivity = (actorUri, followActivity) => {
 app.post("/statuses", async (req, res) => {
     const reqBody = req.body;
     await sendPostToPeerServer(reqBody["status"]);
-    receivedPosts.push({ text: reqBody["status"] });
+    receivedPosts.push({ text: reqBody["status"], actor: reqBody["actor"] });
     res.status(200).json({ message: "Posted to activity pub server." });
 });
 
@@ -53,7 +53,7 @@ app.post(`/users/${SERVER_NAME}/inbox`, async (req, res) => {
 
     if (activity.type === "Create" && activity.object) {
         console.log(`Received post: ${JSON.stringify(activity.object)}`);
-        receivedPosts.push({text: activity.object.content}); // Store received post
+        receivedPosts.push({text: activity.object.content, actor: activity.actor }); // Store received post
         res.status(200).json({ message: "Post received" });
     } else if (activity.type === "Follow" && activity.object && activity.actor) {
         // Basic validation of the Follow activity
