@@ -1,5 +1,5 @@
 services:
-  fungi:
+  fungus:
     build: .
     restart: always
     environment:
@@ -9,7 +9,7 @@ services:
       - 5000:5000
     depends_on: [ fuseki ]
 
-  fungi-frontend:
+  fungus-frontend:
     build:
       context: ./frontend
       args:

@@ -1,34 +1,34 @@
 services:
 
 # --------------------------------------------------------
-# ------------ FUNGI FUNCTIONALITY CONTAINER -------------
+# ------------ FUNGUS FUNCTIONALITY CONTAINER ------------
 # --------------------------------------------------------
-  fungi-backend:
+  fungus-backend:
     build: fungus-backend
     restart: always
     environment:
-      - PORT=5000
-      - FRONTEND_PORT=3000
+      - FUNGUS_BACKEND_PORT=5000
+      - FUNGUS_FRONTEND_PORT=3000
       - FUNGUS_ID=1
-      - PEER_SERVER_PORT=3004
-      - PEER_SERVER_NAME=ap-backend2
-      - AP_SERVER=ap-backend
-      - AP_SERVER_PORT=3003
+      - PEER_AP_BACKEND_PORT=3004
+      - PEER_AP_BACKEND_NAME=ap-backend2
+      - AP_BACKEND_NAME=ap-backend
+      - AP_BACKEND_PORT=3003
     ports:
       - 5000:5000
     depends_on: [ fuseki ]
 
-  fungi-backend2:
+  fungus-backend2:
     build: fungus-backend
     restart: always
     environment:
-      - PORT=5001
-      - FRONTEND_PORT=3001
+      - FUNGUS_BACKEND_PORT=5001
+      - FUNGUS_FRONTEND_PORT=3001
       - FUNGUS_ID=2
-      - PEER_SERVER_PORT=3003
-      - PEER_SERVER_NAME=ap-backend
-      - AP_SERVER=ap-backend2
-      - AP_SERVER_PORT=3004
+      - PEER_AP_BACKEND_NAME=ap-backend
+      - PEER_AP_BACKEND_PORT=3003
+      - AP_BACKEND_NAME=ap-backend2
+      - AP_BACKEND_PORT=3004
     ports:
       - 5001:5001
     depends_on: [ fuseki ]
@@ -39,37 +39,28 @@ services:
   ap-backend:
     build:
       context: ap-backend
-      args:
-        REACT_APP_BACKEND_PORT: 5000
-        REACT_APP_SEMANTIC_URL: "http://localhost:3030"
-        REACT_APP_SOCIAL_URL: "https://techhub.social/@myceliumweb"
     ports:
       - 3003:3003
-      - 8000:8000
     restart: always
     environment:
-      - PORT=3003
-      - FEDIFY_SERVER_NAME=ap-backend
-      - FUNGI_SERVER_NAME=fungi-backend
-      - FUNGI_SERVER_PORT=5000
-    depends_on: [ fungi-backend ]
+      - AP_BACKEND_PORT=3003
+      - AP_BACKEND_NAME=ap-backend
+      - FUNGUS_BACKEND_NAME=fungus-backend
+      - FUNGUS_BACKEND_PORT=5000
+    depends_on: [ fungus-backend ]
 
   ap-backend2:
     build:
       context: ap-backend
-      args:
-        REACT_APP_BACKEND_PORT: 5001
-        REACT_APP_SEMANTIC_URL: "http://localhost:3030"
-        REACT_APP_SOCIAL_URL: "https://techhub.social/@myceliumweb"
     ports:
       - 3004:3004
     restart: always
     environment:
-      - PORT=3004
-      - FEDIFY_SERVER_NAME=ap-backend2
-      - FUNGI_SERVER_NAME=fungi-backend2
-      - FUNGI_SERVER_PORT=5001
-    depends_on: [ fungi-backend2 ]
+      - AP_BACKEND_PORT=3004
+      - AP_BACKEND_NAME=ap-backend2
+      - FUNGUS_BACKEND_NAME=fungus-backend2
+      - FUNGUS_BACKEND_PORT=5001
+    depends_on: [ fungus-backend2 ]
 
 # ---------------------------------------------------
 # ------------ KNOWLEDGE BASE CONTAINER -------------
@@ -86,32 +77,32 @@ services:
 # ---------------------------------------------
 # ------------ FRONTEND CONTAINER -------------
 # ---------------------------------------------
-  fungi-frontend:
+  fungus-frontend:
     build:
       context: ./frontend
       args:
-        REACT_APP_BACKEND_PORT: 5000
+        REACT_APP_FUNGUS_BACKEND_PORT: 5000
         REACT_APP_SEMANTIC_URL: "http://localhost:3030"
         REACT_APP_SOCIAL_URL: "https://techhub.social/@myceliumweb"
-        REACT_APP_AP_PORT: 3003
+        REACT_APP_AP_BACKEND_PORT: 3003
     ports:
       - 3000:3000
     restart: always
     environment:
       - PORT=3000
-    depends_on: [ fungi-backend ]
+    depends_on: [ fungus-backend ]
 
-  fungi-frontend2:
+  fungus-frontend2:
     build:
       context: ./frontend
       args:
-        REACT_APP_BACKEND_PORT: 5001
+        REACT_APP_FUNGUS_BACKEND_PORT: 5001
         REACT_APP_SEMANTIC_URL: "http://localhost:3030"
         REACT_APP_SOCIAL_URL: "https://techhub.social/@myceliumweb"
-        REACT_APP_AP_PORT: 3004
+        REACT_APP_AP_BACKEND_PORT: 3004
     ports:
       - 3001:3001
     restart: always
     environment:
       - PORT=3001
-    depends_on: [ fungi-backend2 ]
+    depends_on: [ fungus-backend2 ]

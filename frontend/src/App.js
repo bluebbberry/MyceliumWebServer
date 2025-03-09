@@ -6,8 +6,8 @@ function App() {
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState('');
   const [fungusName, setFungusName] = useState('');
-  const [modelInfo, setModelInfo] = useState(null);  // Model info (name and fungi that train it)
-  const [allFungi, setAllFungi] = useState([]);     // All fungi known to the fungus
+  const [modelInfo, setModelInfo] = useState(null);  // Model info (name and fungus that train it)
+  const [allFungus, setAllFungi] = useState([]);     // All fungus known to the fungus
   const [profileImage, setProfileImage] = useState('');
 
   const socialUrl = process.env.REACT_APP_SOCIAL_URL;
@@ -82,7 +82,7 @@ function App() {
   useEffect(() => {
     const fetchExternalMessages = async () => {
       try {
-        const apPort = process.env.REACT_APP_AP_PORT
+        const apPort = process.env.REACT_APP_AP_BACKEND_PORT
         const response = await axios.get(`http://127.0.0.1:${apPort}/statuses`);
         if (response.data.statuses != null && response.data.statuses.length > 0) {
           console.log("Received statuses:", response.data.statuses);
@@ -98,16 +98,16 @@ function App() {
     return () => clearInterval(interval);
   }, []);
 
-  // Fetch model fungi and all fungi (from earlier trainings)
+  // Fetch model fungus and all fungi (from earlier trainings)
   useEffect(() => {
-    const loadFungiData = async () => {
+    const loadFungusData = async () => {
       try {
-        const backendPort = process.env.REACT_APP_BACKEND_PORT;
+        const backendPort = process.env.REACT_APP_FUNGUS_BACKEND_PORT;
         const response = await axios.get(`http://127.0.0.1:${backendPort}/fungi`);
         setModelInfo(response.data.model || null);  // Model info (name and fungi that train it)
         setAllFungi(response.data.allFungi || []);  // All fungi known to the fungus
       } catch (error) {
-        console.error('Error loading fungi data:', error);
+        console.error('Error loading fungus data:', error);
         setModelInfo(null);
         setAllFungi([]);
       }

@@ -7,8 +7,8 @@ app.use(bodyParser.json()); // Parse incoming JSON requests
 
 let receivedPosts: any[] = []; // Store received posts
 
-const fetchFungiInfo = async () => {
-    const response = await fetch('http://' + process.env.FUNGI_SERVER_NAME + ':' + process.env.FUNGI_SERVER_PORT + '/info', { method: "GET" });
+const fetchFungusInfo = async () => {
+    const response = await fetch('http://' + process.env.FUNGUS_BACKEND_NAME + ':' + process.env.FUNGUS_BACKEND_PORT + '/info', { method: "GET" });
     const data: any = await response.json();
 
     const peerServerPort = data["info"]["PEER_SERVER_PORT"];
@@ -19,10 +19,10 @@ const fetchFungiInfo = async () => {
     return [ peerServerPort, peerServerName ];
 }
 
-const PORT = process.env.PORT || 3000;
-const SERVER_NAME = process.env.FEDIFY_SERVER_NAME || 'server1';
+const PORT = process.env.AP_BACKEND_PORT || 3000;
+const SERVER_NAME = process.env.AP_BACKEND_NAME || 'server1';
 const DOMAIN = `http://${SERVER_NAME}:${PORT}`;
-let [ peerServerPort, peerServerName ] = await fetchFungiInfo();
+let [ peerServerPort, peerServerName ] = await fetchFungusInfo();
 const PEER_SERVER = "http://" + peerServerName + ":" + peerServerPort || null;
 const PEER_SERVER_NAME = peerServerName || null;
 const followers = new Set(); // Store the followers
@@ -140,9 +140,6 @@ const sendPostToPeerServer = async (content: string) => {
 };
 
 const sendFollowRequest = async () => {
-    const SERVER_NAME = process.env.FEDIFY_SERVER_NAME || 'server1';
-    const DOMAIN = `http://${SERVER_NAME}:${process.env.PORT || 3000}`;
-
     if (!PEER_SERVER || !PEER_SERVER_NAME) {
         console.error("Peer server or peer server name not set. Cannot send follow request.");
         return;

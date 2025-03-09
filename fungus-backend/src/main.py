@@ -37,7 +37,7 @@ class MusicRecommendationFungus:
         self.feedback_threshold = float(os.getenv("FEEDBACK_THRESHOLD", 0.5))
         self.fungus_name = self.generate_fungus_name()
         self.profile_picture_code = self.generate_random_code()
-        self.knowledge_graph.insert_fungus_data(os.getenv("FUNGUS_ID", 1), self.fungus_name, os.getenv("FRONTEND_PORT", 3000))
+        self.knowledge_graph.insert_fungus_data(os.getenv("FUNGUS_ID", 1), self.fungus_name, os.getenv("FUNGUS_FRONTEND_PORT", 3000))
         # default sleep time: 42300
         self.sleep_time = float(os.getenv("SLEEP_TIME", 42300))
         logging.info(f"[CONFIG] Feedback threshold set to {self.feedback_threshold}")
@@ -187,8 +187,8 @@ def get_fungi_data():
     else:
         logging.error("Unable to retrieve fungus data from knowledge base - use default values")
         all_fungi = [
-            {"name": "Fungi 1", "port": "3000"},
-            {"name": "Fungi 2", "port": "3001"}
+            {"name": "Fungus 1", "port": "3000"},
+            {"name": "Fungus 2", "port": "3001"}
         ]
     return jsonify( { "allFungi": all_fungi, "model": { "name": "MyModel", "fungi": [ music_service.fungus_name ]}} )
 
@@ -202,14 +202,14 @@ def get_random_profile():
 def get_fungus_info():
     info = {
         "name": music_service.fungus_name,
-        "PEER_SERVER_PORT": os.getenv("PEER_SERVER_PORT", "3003"),
-        "PEER_SERVER_NAME": os.getenv("PEER_SERVER_NAME", "ap-backend"),
+        "PEER_AP_BACKEND_PORT": os.getenv("PEER_AP_BACKEND_PORT", "3003"),
+        "PEER_AP_BACKEND_NAME": os.getenv("PEER_AP_BACKEND_NAME", "ap-backend"),
     }
     return jsonify({"info": info})
 
 
 if __name__ == "__main__":
-    port = int(os.getenv("PORT", 5000))
+    port = int(os.getenv("FUNGUS_BACKEND_PORT", 5000))
     logging.info("[STARTUP] Launching Flask app for Music Recommendation Service on port " + str(port))
     threading.Thread(target=lambda: app.run(host="0.0.0.0", port=int(port), debug=True, use_reloader=False)).start()
     music_service.start()

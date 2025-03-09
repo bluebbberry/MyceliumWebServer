@@ -14,8 +14,8 @@ class MastodonClient:
         self.api_token = os.getenv("MASTODON_API_KEY")
         self.instance_url = os.getenv("MASTODON_INSTANCE_URL")
         self.nutrial_tag = os.getenv("NUTRIAL_TAG")
-        self.ap_server = os.getenv("AP_SERVER")
-        self.ap_server_port = os.getenv("AP_SERVER_PORT")
+        self.ap_server = os.getenv("AP_BACKEND_NAME")
+        self.ap_server_port = os.getenv("AP_BACKEND_PORT")
         self.ids_of_replied_statuses = []
         self.ids_of_replies = []
         self.musicRecommendationFungus = musicRecommendationFungus
