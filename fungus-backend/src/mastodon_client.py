@@ -4,6 +4,7 @@ import os
 import logging
 from dotenv import load_dotenv
 import random
+import json
 
 load_dotenv()
 logging.basicConfig(level=logging.INFO)
@@ -126,9 +127,13 @@ class MastodonClient:
         # Send the POST request
         response = requests.post(f'{self.instance_url}/api/v1/statuses', json=payload, headers=headers)
 
-        if response.status_code == 200:
-            self.ids_of_replied_statuses.append(status_id)
-            self.ids_of_replies.append(response.json()["id"])
-            print("Reply sent successfully!")
-        else:
-            print(f"Failed to send reply: {response.status_code}")
+        try:
+            response_json = response.json()
+            if isinstance(response_json, dict) and "id" in response_json:
+                self.ids_of_replied_statuses.append(status_id)
+                self.ids_of_replies.append(response_json["id"])
+                print("Reply sent successfully!")
+            else:
+                print("Unexpected response format:", response_json)
+        except ValueError as e:
+            print("Failed to parse JSON response:", e)

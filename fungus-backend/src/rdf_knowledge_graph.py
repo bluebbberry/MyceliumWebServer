@@ -374,7 +374,7 @@ class RDFKnowledgeGraph:
             return result.strip()
 
     def on_found_group_to_join(self, link_to_model):
-        self.mastodon_client.post_status("[FUNGUS] model-link: " + str(link_to_model) + " #" + self.mastodon_client.nutrial_tag)
+        self.mastodon_client.post_status("[SPORE] model-link: " + str(link_to_model) + " #" + self.mastodon_client.nutrial_tag)
         if link_to_model is not None:
             found_initial_team = True
             self.fuseki_url = link_to_model

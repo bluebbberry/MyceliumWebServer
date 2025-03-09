@@ -41,7 +41,7 @@ app.post("/statuses", async (req, res) => {
     const reqBody = req.body;
     await sendPostToPeerServer(reqBody["status"]);
     receivedPosts.push({ text: reqBody["status"], actor: reqBody["actor"] });
-    res.status(200).json({ message: "Posted to activity pub server." });
+    res.status(200).json({ message: "Posted to activity pub server.", id: 0 });
 });
 
 // Endpoint to receive follow requests

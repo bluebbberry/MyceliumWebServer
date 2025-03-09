@@ -60,33 +60,44 @@ class MusicRecommendationFungus:
             logging.info(f"[START] Starting epoche {i} (at {datetime.datetime.now()})")
             try:
                 if switch_team or not found_initial_team:
+                    self.mastodon_client.post_status(f"[SPORE] Searching for a new learning group ...")
                     logging.info("[CHECK] Searching for a new fungus group")
                     messages, random_mycelial_tag = self.mastodon_client.get_statuses_from_random_mycelial_tag()
                     link_to_model = self.knowledge_graph.look_for_new_fungus_group_in_statuses(messages, random_mycelial_tag)
+                    self.mastodon_client.post_status(f"[SPORE] Joined new group: {link_to_model}")
                     self.knowledge_graph.look_for_song_data_in_statuses_to_insert(messages)
                     self.knowledge_graph.on_found_group_to_join(link_to_model)
                 else:
                     logging.info("[WAIT] No new groups found.")
+                    self.mastodon_client.post_status(f"[SPORE] No new learning group found. Going to sleep.")
                     link_to_model = None
 
                 if link_to_model is not None:
                     logging.info("[TRAINING] New fungus group detected, initiating training")
+                    self.mastodon_client.post_status(f"[SPORE] Started new training epoche.")
                     self.train_model()
                     all_models = self.knowledge_graph.fetch_all_model_from_knowledge_base(link_to_model)
                     logging.info(f"Received models from other nodes (size: {len(all_models)})")
+                    self.mastodon_client.post_status(f"[SPORE] Finished training and received model from other nodes.")
                     aggregated_model_state = self.knowledge_graph.aggregate_model_states(self.machine_learning_service.model.get_state(), all_models)
                     # deploy new model
                     self.machine_learning_service.model.set_state(aggregated_model_state)
+                    self.mastodon_client.post_status(f"[SPORE] Deployed aggregated model.")
                     logging.info("[SAVING] Deployed aggregated model as new model")
 
                 feedback = self.answer_user_feedback()
                 logging.info(f"[FEEDBACK] Received feedback: {feedback}")
 
                 switch_team = self.decide_whether_to_switch_team(feedback)
+                if switch_team:
+                    self.mastodon_client.post_status(f"[SPORE] Deceided to switch the learning group.")
+                else:
+                    self.mastodon_client.post_status(f"[SPORE] Deceided against switching groups.")
 
                 self.evolve_behavior(feedback)
 
                 logging.info("[SLEEP] Sleeping for " + str(self.sleep_time))
+                self.mastodon_client.post_status(f"[SPORE] Sleeping for {str(self.sleep_time)}.")
                 time.sleep(self.sleep_time)
                 i = i + 1
             except Exception as e:
@@ -101,7 +112,7 @@ class MusicRecommendationFungus:
             logging.info(f"[RESULT] Model trained successfully.")
             self.knowledge_graph.save_model("my-model", model)
             logging.info("[STORE] Model saved to RDF Knowledge Graph")
-            self.mastodon_client.post_status(f"[FUNGUS] Model updated.")
+            self.mastodon_client.post_status(f"[SPORE] Model updated.")
             logging.info("[NOTIFY] Status posted to Mastodon")
         except Exception as e:
             logging.error(f"[ERROR] Failed during training and deployment: {e}", exc_info=True)
@@ -120,9 +131,9 @@ class MusicRecommendationFungus:
         feedback = 1
         fresh_statuses = filter(lambda s: s["id"] not in self.mastodon_client.ids_of_replied_statuses, statuses)
         for status in fresh_statuses:
-            if "[FUNGUS]" not in status['content']:
+            if "[SPORE]" not in status['content']:
                 song_titles = self.machine_learning_service.get_song_recommendations(self.machine_learning_service.extract_song_from_string(status['content']), 3)
-                self.mastodon_client.reply_to_status(status['id'], status['account']['username'], "[FUNGUS] " + str(song_titles))
+                self.mastodon_client.reply_to_status(status['id'], status['account']['username'], "[SPORE] " + str(song_titles))
         # count feedback
         num_of_statuses_send = len(self.mastodon_client.ids_of_replied_statuses)
         overall_favourites = self.mastodon_client.count_likes_of_all_statuses()
@@ -136,6 +147,7 @@ class MusicRecommendationFungus:
         mutation_chance = 0.1
         if random.random() < mutation_chance:
             logging.info("Randomly mutated")
+            self.mastodon_client.post_status(f"[SPORE] Mutated.")
             old_threshold = self.feedback_threshold
             self.feedback_threshold *= random.uniform(0.9, 1.1)  # Randomly adjust threshold
             logging.info(f"[EVOLVE] Feedback threshold mutated from {old_threshold} to {self.feedback_threshold}")
