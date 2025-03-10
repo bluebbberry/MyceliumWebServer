@@ -2,71 +2,59 @@ import express from "express";
 import bodyParser from "body-parser";
 import fetch from "node-fetch";
 
-const app = express();
-app.use(bodyParser.json()); // Parse incoming JSON requests
+// ==============================================================
+// ========================= TYPES ==============================
+// ==============================================================
 
-let receivedPosts: any[] = []; // Store received posts
-
-let FUNGUS_ID: any = process.env.FUNGUS_ID
-if (!FUNGUS_ID) {
-    console.error("No FUNGI ID env var defined");
-    FUNGUS_ID = 0;
-}
-const NUM_OF_FUNGI: any = process.env.NUM_OF_FUNGI;
-const AP_BACKEND_PORT_START: number = parseInt((process.env.AP_BACKEND_PORT) || "3000");
-const AP_BACKEND_NAME_START: string = process.env.AP_BACKEND_NAME || 'server1';
-const AP_BACKEND_PORT: number = +AP_BACKEND_PORT_START + +parseInt(FUNGUS_ID);
-const AP_BACKEND_NAME = AP_BACKEND_NAME_START + "" + FUNGUS_ID;
-const AP_BACKEND_DOMAIN = `http://${AP_BACKEND_NAME}:${AP_BACKEND_PORT}`;
-
-function toApBackendPeerNames(apBackendNameStart: string, fungiId: number, numOfFungi: number) {
-    const result = [];
-    for (let fungiNameSuffix = 0; fungiNameSuffix < numOfFungi; fungiNameSuffix++) {
-        if (fungiNameSuffix != fungiId) {
-            result.push(apBackendNameStart + "" + fungiNameSuffix);
-        }
-    }
-    return result;
-}
-
-function toApBackendDomains(apBackendNameStart: string, apBackendPortStart: number, fungiId: number, numOfFungi: number) {
-    const result = [];
-    for (let i: number = 0; i < numOfFungi; i++) {
-        if (i != fungiId) {
-            const name: string = apBackendNameStart + "" + i;
-            const backendPort: number = +apBackendPortStart + +i;
-            result.push("http://" + name + ":" + backendPort);
-        }
-    }
-    return result;
-}
-
-const apPeerServerNames = toApBackendPeerNames(AP_BACKEND_NAME_START, FUNGUS_ID, NUM_OF_FUNGI) || null;
-const apPeerServers = toApBackendDomains(AP_BACKEND_NAME_START, AP_BACKEND_PORT_START, FUNGUS_ID, NUM_OF_FUNGI) || null;
-
-const followers = new Set(); // Store the followers
-
-// Helper function to generate an 'Accept' activity
-const createAcceptActivity = (actorUri: any, followActivity: any) => {
-    return {
-        "@context": "https://www.w3.org/ns/activitystreams",
-        type: "Accept",
-        actor: actorUri,
-        object: followActivity,
-    };
+// The structure of an ActivityPub message
+type Activity = {
+    "@context": string;
+    type: string;
+    actor: string;
+    object?: any;
 };
 
-app.post("/statuses", async (req, res) => {
-    const reqBody = req.body;
-    await sendPostToPeerServer(reqBody["status"]);
-    receivedPosts.push({ text: reqBody["status"], actor: reqBody["actor"] });
-    res.status(200).json({ message: "Posted to activity pub server.", id: 0 });
-});
+// ==================================================================
+// ========================= CONSTANTS ==============================
+// ==================================================================
+
+// Received posts and followers
+let receivedPosts: { text: string; actor: string }[] = [];
+const followers = new Set<string>();
+
+// Environment variables with defaults
+const FUNGUS_ID = parseInt(process.env.FUNGUS_ID || "0", 10);
+const NUM_OF_FUNGI = parseInt(process.env.NUM_OF_FUNGI || "1", 10);
+const AP_BACKEND_PORT_START = parseInt(process.env.AP_BACKEND_PORT || "3000", 10);
+const AP_BACKEND_NAME_START = process.env.AP_BACKEND_NAME || "server1";
+const AP_BACKEND_PORT = AP_BACKEND_PORT_START + FUNGUS_ID;
+const AP_BACKEND_NAME = AP_BACKEND_NAME_START + FUNGUS_ID;
+const AP_BACKEND_DOMAIN = `http://${AP_BACKEND_NAME}:${AP_BACKEND_PORT}`;
+
+// Peer server names and domains
+let allApPeerServerNames: string[] = [];
+let allApPeerServers: string[] = [];
+for (let i = 0; i < NUM_OF_FUNGI; i++) {
+    if (i !== FUNGUS_ID) {
+        const name = AP_BACKEND_NAME_START + i;
+        allApPeerServerNames.push(name);
+        const backendPort = +AP_BACKEND_PORT_START + +i;
+        console.log(`Peer server at: http://${name}:${backendPort}`);
+        allApPeerServers.push(`http://${name}:${backendPort}`);
+    }
+}
+
+// =======================================================
+// =============== MAIN FUNCTIONALITY ====================
+// =======================================================
+
+const app = express();
+app.use(bodyParser.json()); // Parse incoming JSON requests
 
 // Endpoint to receive follow requests
 app.post(`/users/${AP_BACKEND_NAME}/inbox`, async (req, res) => {
 
-    const activity = req.body;
+    const activity: Activity = req.body;
 
     console.log("Received activity:", JSON.stringify(activity, null, 2));  // Log the received activity
 
@@ -102,6 +90,15 @@ app.get("/followers", (req, res) => {
     res.json(Array.from(followers));
 });
 
+// Endpoint to post a message
+app.post("/statuses", async (req, res) => {
+    const reqBody = req.body;
+    await sendPostToPeerServer(reqBody["status"]);
+    receivedPosts.push({ text: reqBody["status"], actor: reqBody["actor"] });
+    res.status(200).json({ message: "Posted to activity pub server.", id: 0 });
+});
+
+// Endpoint to view received messages
 app.get("/statuses", (req, res) => {
     res.header("Access-Control-Allow-Origin", "*");
     res.header('Access-Control-Allow-Methods', 'DELETE, PUT');
@@ -121,6 +118,7 @@ app.get(`/users/${AP_BACKEND_NAME}`, (req, res) => {
     });
 });
 
+// Start the server
 let server = app.listen(AP_BACKEND_PORT, () => {
     console.log(`Server running on ${AP_BACKEND_DOMAIN}`);
 });
@@ -137,12 +135,12 @@ const sendPostToPeerServer = async (content: string) => {
         },
     };
 
-    if (apPeerServers) {
-        for (let i = 0; i < apPeerServers.length; i++) {
-            const apPeerServer = apPeerServers[i];
-            const apPeerServerName = apPeerServerNames[i];
+    if (allApPeerServers) {
+        for (let i = 0; i < allApPeerServers.length; i++) {
+            const apPeerServer = allApPeerServers[i];
+            const apPeerServerName = allApPeerServerNames[i];
             try {
-                const response = await fetch(`${apPeerServer}/users/${apPeerServerNames}/inbox`, {
+                const response = await fetch(`${apPeerServer}/users/${apPeerServerName}/inbox`, {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json",
@@ -153,27 +151,37 @@ const sendPostToPeerServer = async (content: string) => {
                 if (response.ok) {
                     console.log("Post sent to peer server successfully!");
                 } else {
-                    console.error("Error sending post:", response.statusText);
+                    console.error("Error sending post:", response.statusText, " to ", `${apPeerServer}/users/${apPeerServerName}/inbox`);
                 }
             } catch (error) {
-                console.error("Failed to send post:", error);
+                console.error("Failed to send post:", error, "to", `${apPeerServer}/users/${apPeerServerName}/inbox`);
             }
         }
     }
 };
 
+// Helper function to generate an 'Accept' activity
+const createAcceptActivity = (actorUri: any, followActivity: any) => {
+    return {
+        "@context": "https://www.w3.org/ns/activitystreams",
+        type: "Accept",
+        actor: actorUri,
+        object: followActivity,
+    };
+};
+
 const sendFollowRequest = async () => {
-    if (!apPeerServers || !apPeerServerNames) {
+    if (!allApPeerServers || !allApPeerServerNames) {
         console.error("Peer server or peer server name not set. Cannot send follow request.");
         return false;
     }
 
     let succeeded = true;
 
-    if (apPeerServers) {
-        for (let i = 0; i < apPeerServers.length; i++) {
-            const targetServerUrl = apPeerServers[i]; // The server you are following
-            const targetUser = apPeerServerNames[i]; // The user you're trying to follow
+    if (allApPeerServers) {
+        for (let i = 0; i < allApPeerServers.length; i++) {
+            const targetServerUrl = allApPeerServers[i]; // The server you are following
+            const targetUser = allApPeerServerNames[i]; // The user you're trying to follow
             const actor = `${AP_BACKEND_DOMAIN}/users/${AP_BACKEND_NAME}`; // Your server as the actor (following)
 
             // Follow activity payload
@@ -199,11 +207,11 @@ const sendFollowRequest = async () => {
                     console.log("Server's response:", responseData);
                     succeeded = succeeded && true;
                 } else {
-                    console.error("Error sending follow request:", response.statusText);
+                    console.error("Error sending follow request:", response.statusText, "to", targetServerUrl);
                     succeeded = false;
                 }
             } catch (error) {
-                console.error("Failed to send follow request:", error);
+                console.error("Failed to send follow request:", error, "to", targetServerUrl);
                 succeeded = false;
             }
         }
@@ -227,7 +235,7 @@ setTimeout(() => {
             }
         });
         sendPostToPeerServer("Hello, this is a post from " + AP_BACKEND_NAME);
-    }, randomIntFromInterval(1000, 5000)
+    }, randomIntFromInterval(5000, 20000)
 );
 
 function randomIntFromInterval(min: number, max: number) { // min and max included
