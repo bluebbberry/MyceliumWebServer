@@ -30,8 +30,6 @@ FUNGUS_ID = int(os.getenv("FUNGUS_ID", 0))
 NUM_OF_FUNGI = int(os.getenv("NUM_OF_FUNGI", 1))
 FUNGUS_FRONTEND_PORT = int(os.getenv("FUNGUS_FRONTEND_PORT", 3000)) + FUNGUS_ID
 FUNGUS_BACKEND_PORT = int(os.getenv("FUNGUS_BACKEND_PORT", 5000)) + FUNGUS_ID
-PEER_AP_BACKEND_PORT = int(os.getenv("PEER_AP_BACKEND_PORT", 3003)) + ((NUM_OF_FUNGI - 1) - FUNGUS_ID)
-PEER_AP_BACKEND_NAME = os.getenv("PEER_AP_BACKEND_NAME", "ap-backend") + str((NUM_OF_FUNGI - 1) - FUNGUS_ID)
 
 FEEDBACK_THRESHOLD = float(os.getenv("FEEDBACK_THRESHOLD", 0.5))
 SLEEP_TIME = float(os.getenv("SLEEP_TIME", 42300))
@@ -212,8 +210,6 @@ def get_random_profile():
 def get_fungus_info():
     info = {
         "name": music_service.fungus_name,
-        "PEER_AP_BACKEND_PORT": PEER_AP_BACKEND_PORT,
-        "PEER_AP_BACKEND_NAME": PEER_AP_BACKEND_NAME,
     }
     return jsonify({"info": info})
 

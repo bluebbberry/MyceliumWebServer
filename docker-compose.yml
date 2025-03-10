@@ -3,7 +3,7 @@ services:
 # --------------------------------------------------------
 # ------------ FUNGUS FUNCTIONALITY CONTAINER ------------
 # --------------------------------------------------------
-  fungus-backend1:
+  fungus-backend0:
     build: fungus-backend
     restart: always
     environment:
@@ -13,7 +13,7 @@ services:
       - 5000:5000
     depends_on: [ fuseki ]
 
-  fungus-backend2:
+  fungus-backend1:
     build: fungus-backend
     restart: always
     environment:
@@ -26,7 +26,7 @@ services:
 # -------------------------------------------------
 # ------------ ACTIVITY PUB CONTAINER -------------
 # -------------------------------------------------
-  ap-backend1:
+  ap-backend0:
     build:
       context: ap-backend
     ports:
@@ -35,9 +35,9 @@ services:
     environment:
       - FUNGUS_ID=0
     env_file: ".env"
-    depends_on: [ fungus-backend1 ]
+    depends_on: [ fungus-backend0 ]
 
-  ap-backend2:
+  ap-backend1:
     build:
       context: ap-backend
     ports:
@@ -46,7 +46,7 @@ services:
     environment:
       - FUNGUS_ID=1
     env_file: ".env"
-    depends_on: [ fungus-backend2 ]
+    depends_on: [ fungus-backend1 ]
 
 # ---------------------------------------------------
 # ------------ KNOWLEDGE BASE CONTAINER -------------
@@ -63,7 +63,7 @@ services:
 # ---------------------------------------------
 # ------------ FRONTEND CONTAINER -------------
 # ---------------------------------------------
-  fungus-frontend1:
+  fungus-frontend0:
     build:
       context: ./frontend
       args:
@@ -79,9 +79,9 @@ services:
     environment:
       - PORT=3000
       - FUNGUS_ID=0
-    depends_on: [ fungus-backend1 ]
+    depends_on: [ fungus-backend0 ]
 
-  fungus-frontend2:
+  fungus-frontend1:
     build:
       context: ./frontend
       args:
@@ -97,4 +97,4 @@ services:
     environment:
       - PORT=3001
       - FUNGUS_ID=1
-    depends_on: [ fungus-backend2 ]
+    depends_on: [ fungus-backend1 ]
