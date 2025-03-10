@@ -15,7 +15,7 @@ if (!FUNGUS_ID) {
 const NUM_OF_FUNGI: any = process.env.NUM_OF_FUNGI;
 const AP_BACKEND_PORT_START: number = parseInt((process.env.AP_BACKEND_PORT) || "3000");
 const AP_BACKEND_NAME_START: string = process.env.AP_BACKEND_NAME || 'server1';
-const AP_BACKEND_PORT: number = AP_BACKEND_PORT_START + parseInt(FUNGUS_ID);
+const AP_BACKEND_PORT: number = +AP_BACKEND_PORT_START + +parseInt(FUNGUS_ID);
 const AP_BACKEND_NAME = AP_BACKEND_NAME_START + "" + FUNGUS_ID;
 const AP_BACKEND_DOMAIN = `http://${AP_BACKEND_NAME}:${AP_BACKEND_PORT}`;
 
@@ -34,7 +34,7 @@ function toApBackendDomains(apBackendNameStart: string, apBackendPortStart: numb
     for (let i: number = 0; i < numOfFungi; i++) {
         if (i != fungiId) {
             const name: string = apBackendNameStart + "" + i;
-            const backendPort: number = apBackendPortStart + i;
+            const backendPort: number = +apBackendPortStart + +i;
             result.push("http://" + name + ":" + backendPort);
         }
     }
@@ -121,7 +121,7 @@ app.get(`/users/${AP_BACKEND_NAME}`, (req, res) => {
     });
 });
 
-app.listen(AP_BACKEND_PORT, () => {
+let server = app.listen(AP_BACKEND_PORT, () => {
     console.log(`Server running on ${AP_BACKEND_DOMAIN}`);
 });
 
@@ -165,8 +165,10 @@ const sendPostToPeerServer = async (content: string) => {
 const sendFollowRequest = async () => {
     if (!apPeerServers || !apPeerServerNames) {
         console.error("Peer server or peer server name not set. Cannot send follow request.");
-        return;
+        return false;
     }
+
+    let succeeded = true;
 
     if (apPeerServers) {
         for (let i = 0; i < apPeerServers.length; i++) {
@@ -195,22 +197,38 @@ const sendFollowRequest = async () => {
                     console.log("Follow request sent successfully!");
                     const responseData = await response.json();
                     console.log("Server's response:", responseData);
+                    succeeded = succeeded && true;
                 } else {
                     console.error("Error sending follow request:", response.statusText);
+                    succeeded = false;
                 }
             } catch (error) {
                 console.error("Failed to send follow request:", error);
+                succeeded = false;
             }
         }
     }
+
+    return succeeded;
 };
 
+function exit() {
+    server.close((err) => {
+        console.log('server closed');
+        process.exit(err ? 1 : 0);
+    });
+}
+
 // Trigger the follow request
-setTimeout(
-    function() {
-        sendFollowRequest();
+setTimeout(() => {
+        sendFollowRequest().then((didSucceed) => {
+            if (!didSucceed) {
+                exit();
+            }
+        });
         sendPostToPeerServer("Hello, this is a post from " + AP_BACKEND_NAME);
-    }, randomIntFromInterval(1000, 5000));
+    }, randomIntFromInterval(1000, 5000)
+);
 
 function randomIntFromInterval(min: number, max: number) { // min and max included
     return Math.floor(Math.random() * (max - min + 1) + min);
