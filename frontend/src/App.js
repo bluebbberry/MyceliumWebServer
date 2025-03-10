@@ -14,7 +14,7 @@ function App() {
   const semanticUrl = process.env.REACT_APP_SEMANTIC_URL;
   const FUNGUS_ID = parseInt(process.env.REACT_APP_FUNGUS_ID);
   const FUNGUS_BACKEND_PORT = parseInt(process.env.REACT_APP_FUNGUS_BACKEND_PORT) + FUNGUS_ID;
-  const AP_BACKEND_PORT = parseInt(process.env.REACT_APP_AP_FUNGUS_BACKEND_PORT) + FUNGUS_ID;
+  const AP_BACKEND_PORT = parseInt(process.env.REACT_APP_AP_BACKEND_PORT) + FUNGUS_ID;
 
   // Fetch fungus name on component mount
   useEffect(() => {
