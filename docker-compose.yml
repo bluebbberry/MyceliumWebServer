@@ -23,6 +23,16 @@ services:
       - 5001:5001
     depends_on: [ fuseki ]
 
+  fungus-backend2:
+    build: fungus-backend
+    restart: always
+    environment:
+      - FUNGUS_ID=2
+    env_file: ".env"
+    ports:
+      - 5002:5002
+    depends_on: [ fuseki ]
+
 # -------------------------------------------------
 # ------------ ACTIVITY PUB CONTAINER -------------
 # -------------------------------------------------
@@ -47,6 +57,17 @@ services:
       - FUNGUS_ID=1
     env_file: ".env"
     depends_on: [ fungus-backend1 ]
+
+  ap-backend2:
+    build:
+      context: ap-backend
+    ports:
+      - 3005:3005
+    restart: always
+    environment:
+      - FUNGUS_ID=2
+    env_file: ".env"
+    depends_on: [ fungus-backend2 ]
 
 # ---------------------------------------------------
 # ------------ KNOWLEDGE BASE CONTAINER -------------
@@ -98,3 +119,21 @@ services:
       - PORT=3001
       - FUNGUS_ID=1
     depends_on: [ fungus-backend1 ]
+
+  fungus-frontend2:
+    build:
+      context: ./frontend
+      args:
+        REACT_APP_FUNGUS_ID: 2
+        REACT_APP_FUNGUS_BACKEND_PORT: ${FUNGUS_BACKEND_PORT}
+        REACT_APP_SEMANTIC_URL: "http://localhost:3030"
+        REACT_APP_SOCIAL_URL: "https://techhub.social/@myceliumweb"
+        REACT_APP_AP_BACKEND_PORT: ${AP_BACKEND_PORT}
+    ports:
+      - 3002:3002
+    restart: always
+    env_file: ".env"
+    environment:
+      - PORT=3002
+      - FUNGUS_ID=2
+    depends_on: [ fungus-backend2 ]
