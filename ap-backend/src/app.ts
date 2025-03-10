@@ -35,14 +35,15 @@ function toApBackendDomains(apBackendNameStart: string, apBackendPortStart: numb
         if (i != fungiId) {
             const name: string = apBackendNameStart + "" + i;
             const backendPort: number = +apBackendPortStart + +i;
+            console.log("peer server at: http://" + name + ":" + backendPort)
             result.push("http://" + name + ":" + backendPort);
         }
     }
     return result;
 }
 
-const apPeerServerNames = toApBackendPeerNames(AP_BACKEND_NAME_START, FUNGUS_ID, NUM_OF_FUNGI) || null;
-const apPeerServers = toApBackendDomains(AP_BACKEND_NAME_START, AP_BACKEND_PORT_START, FUNGUS_ID, NUM_OF_FUNGI) || null;
+const allApPeerServerNames = toApBackendPeerNames(AP_BACKEND_NAME_START, FUNGUS_ID, NUM_OF_FUNGI) || null;
+const allApPeerServers = toApBackendDomains(AP_BACKEND_NAME_START, AP_BACKEND_PORT_START, FUNGUS_ID, NUM_OF_FUNGI) || null;
 
 const followers = new Set(); // Store the followers
 
@@ -137,12 +138,12 @@ const sendPostToPeerServer = async (content: string) => {
         },
     };
 
-    if (apPeerServers) {
-        for (let i = 0; i < apPeerServers.length; i++) {
-            const apPeerServer = apPeerServers[i];
-            const apPeerServerName = apPeerServerNames[i];
+    if (allApPeerServers) {
+        for (let i = 0; i < allApPeerServers.length; i++) {
+            const apPeerServer = allApPeerServers[i];
+            const apPeerServerName = allApPeerServerNames[i];
             try {
-                const response = await fetch(`${apPeerServer}/users/${apPeerServerNames}/inbox`, {
+                const response = await fetch(`${apPeerServer}/users/${apPeerServerName}/inbox`, {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json",
@@ -153,27 +154,27 @@ const sendPostToPeerServer = async (content: string) => {
                 if (response.ok) {
                     console.log("Post sent to peer server successfully!");
                 } else {
-                    console.error("Error sending post:", response.statusText);
+                    console.error("Error sending post:", response.statusText, " to ", `${apPeerServer}/users/${apPeerServerName}/inbox`);
                 }
             } catch (error) {
-                console.error("Failed to send post:", error);
+                console.error("Failed to send post:", error, "to", `${apPeerServer}/users/${apPeerServerName}/inbox`);
             }
         }
     }
 };
 
 const sendFollowRequest = async () => {
-    if (!apPeerServers || !apPeerServerNames) {
+    if (!allApPeerServers || !allApPeerServerNames) {
         console.error("Peer server or peer server name not set. Cannot send follow request.");
         return false;
     }
 
     let succeeded = true;
 
-    if (apPeerServers) {
-        for (let i = 0; i < apPeerServers.length; i++) {
-            const targetServerUrl = apPeerServers[i]; // The server you are following
-            const targetUser = apPeerServerNames[i]; // The user you're trying to follow
+    if (allApPeerServers) {
+        for (let i = 0; i < allApPeerServers.length; i++) {
+            const targetServerUrl = allApPeerServers[i]; // The server you are following
+            const targetUser = allApPeerServerNames[i]; // The user you're trying to follow
             const actor = `${AP_BACKEND_DOMAIN}/users/${AP_BACKEND_NAME}`; // Your server as the actor (following)
 
             // Follow activity payload
@@ -199,11 +200,11 @@ const sendFollowRequest = async () => {
                     console.log("Server's response:", responseData);
                     succeeded = succeeded && true;
                 } else {
-                    console.error("Error sending follow request:", response.statusText);
+                    console.error("Error sending follow request:", response.statusText, "to", targetServerUrl);
                     succeeded = false;
                 }
             } catch (error) {
-                console.error("Failed to send follow request:", error);
+                console.error("Failed to send follow request:", error, "to", targetServerUrl);
                 succeeded = false;
             }
         }
@@ -227,7 +228,7 @@ setTimeout(() => {
             }
         });
         sendPostToPeerServer("Hello, this is a post from " + AP_BACKEND_NAME);
-    }, randomIntFromInterval(1000, 5000)
+    }, randomIntFromInterval(5000, 20000)
 );
 
 function randomIntFromInterval(min: number, max: number) { // min and max included
