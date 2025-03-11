@@ -149,7 +149,7 @@ class MastodonClient:
             print("Failed to parse JSON response:", e)
 
     def post_spore_status(self, spore_action):
-        status_text = json_dump({
+        status_text = json.dumps({
             "spore_type": spore_action.spore_type,
             "args": spore_action.args
         })
