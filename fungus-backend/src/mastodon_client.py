@@ -175,9 +175,6 @@ class MastodonClient:
     def fetch_latest_spore_actions(self):
         base_url = f"http://{self.ap_server}:{self.ap_server_port}"
 
-        if hashtag is None:
-            hashtag = self.nutrial_tag
-
         headers = {
             'Authorization': f'Bearer {self.api_token}',
             'Accept': 'application/json'
@@ -185,7 +182,7 @@ class MastodonClient:
 
         params = {
             'type': 'statuses',
-            'tag': hashtag,
+            'tag': "spore",
             'limit': 30
         }
 
@@ -199,7 +196,8 @@ class MastodonClient:
             statuses = data
             received_spore_actions = []
             for status in statuses:
-                spore_action_dict = json.loads(status.content)
+                logging.info("Parsing: f{status}")
+                spore_action_dict = json.loads(status)
                 received_spore_actions.push(SporeAction(spore_action_dict.spore_type, spore_action_dict.args))
             return received_spore_actions
         else:
