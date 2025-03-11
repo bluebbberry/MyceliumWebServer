@@ -192,12 +192,22 @@ class MastodonClient:
 
         if response.status_code == 200:
             logging.info("Parsing response element:\n" + json.dumps(response.json(), indent=2))
-            data = json.loads(response.json()["spore-actions"])
-            logging.info(f"Found {len(data)} latest spore action posts")
+
+            # Step 1: Extract spore-actions field (which is a string)
+            spore_actions = response.json()["spore-actions"]
+
+            logging.info(f"Found {len(spore_actions)} latest spore action posts")
             received_spore_actions = []
-            for status in data:
-                spore_action_dict = json.loads(status.text)
-                received_spore_actions.push(SporeAction(spore_action_dict.spore_type, spore_action_dict.args))
+
+            for status in spore_actions:
+                logging.info(status)
+
+                # Step 3: Extract and parse 'text' field
+                spore_action_dict = json.loads(status["text"])
+
+                # Step 4: Create the SporeAction object
+                received_spore_actions.append(SporeAction(spore_action_dict["spore_type"], spore_action_dict["args"]))
+
             return received_spore_actions
         else:
             logging.error(f"Error: {response.status_code}")

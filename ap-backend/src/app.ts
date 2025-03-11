@@ -64,7 +64,8 @@ app.post(`/users/${AP_BACKEND_NAME}/inbox`, async (req, res) => {
         receivedPosts.push({text: activity.object.content, actor: activity.actor }); // Store received post
         if (activity.object.content.includes("#spore")) {
             console.log("Its a spore!");
-            receivedSporeActions.push({text: activity.object.content, actor: activity.actor });
+            const contentWithoutSpore = activity.object.content.replace(/#spore/g, "").trim();
+            receivedSporeActions.push({text: contentWithoutSpore, actor: activity.actor });
         }
         res.status(200).json({ message: "Post received" });
     } else if (activity.type === "Follow" && activity.object && activity.actor) {
@@ -103,13 +104,6 @@ app.post("/statuses", async (req, res) => {
     res.status(200).json({ message: "Posted to activity pub server.", id: 0 });
 });
 
-// Endpoint to post a spore message
-app.post("/spore-actions", async (req, res) => {
-    const reqBody = req.body;
-    await sendSporeActionToPeerServer(reqBody["status"]);
-    res.status(200).json({ message: "Posted spore to activity pub server.", id: 0 });
-});
-
 // Endpoint to view received messages
 app.get("/statuses", (req, res) => {
     res.header("Access-Control-Allow-Origin", "*");
@@ -120,11 +114,18 @@ app.get("/statuses", (req, res) => {
 });
 
 // Endpoint to post a spore message
+app.post("/spore-actions", async (req, res) => {
+    const reqBody = req.body;
+    await sendSporeActionToPeerServer(reqBody["status"]);
+    res.status(200).json({ message: "Posted spore to activity pub server.", id: 0 });
+});
+
+// Endpoint to post a spore message
 app.get("/spore-actions", async (req, res) => {
     res.header("Access-Control-Allow-Origin", "*");
     res.header('Access-Control-Allow-Methods', 'DELETE, PUT');
     res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
-    res.json({ "spore-actions": JSON.stringify(receivedSporeActions) });
+    res.json({ "spore-actions": receivedSporeActions });
     receivedSporeActions = [];
 });
 

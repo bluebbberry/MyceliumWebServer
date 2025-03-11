@@ -33,7 +33,7 @@ NUM_OF_FUNGI = int(os.getenv("NUM_OF_FUNGI", 1))
 FUNGUS_FRONTEND_PORT = int(os.getenv("FUNGUS_FRONTEND_PORT", 3000)) + FUNGUS_ID
 FUNGUS_BACKEND_PORT = int(os.getenv("FUNGUS_BACKEND_PORT", 5000)) + FUNGUS_ID
 FUSEKI_SERVER_URL = os.getenv("FUSEKI_SERVER_URL")
-FUSEKI_DATABASE_NAME = os.getenv("FUSEKI_DATASET_NAME")
+FUSEKI_DATABASE_NAME = os.getenv("FUSEKI_DATABASE_NAME")
 
 FEEDBACK_THRESHOLD = float(os.getenv("FEEDBACK_THRESHOLD", 0.5))
 SLEEP_TIME = float(os.getenv("SLEEP_TIME", 42300))
@@ -85,7 +85,7 @@ class MusicRecommendationFungus:
 
                     self.spore_manager.fetch_spore_actions()
                     spore_actions = self.spore_manager.get_spore_actions()
-                    join_spore_action = self.filter_by_value(spore_actions, 'spore_type', 'JOIN_GROUP')
+                    join_spore_action = self.filter_spore_actions_by_type(spore_actions, 'JOIN_GROUP')
                     #link_to_model = self.knowledge_graph.look_for_new_fungus_group_in_statuses(messages, random_mycelial_tag)
                     if join_spore_action and len(join_spore_action) > 0:
                         self.link_to_model = join_spore_action[0].args[0]
@@ -193,8 +193,8 @@ class MusicRecommendationFungus:
             recommendations = [rec.tolist() if hasattr(rec, 'tolist') else rec for rec in recommendations]
         return recommendations
 
-    def filter_by_value(self, seq, attribute, value):
-        return list(filter(lambda e: e[attribute] == value, seq))
+    def filter_spore_actions_by_type(self, spore_actions, spore_type):
+        return list(filter(lambda e: e.spore_type == spore_type, spore_actions))
 
 
 logging.info("[STARTUP] Launching MusicRecommendationFungus instance")
