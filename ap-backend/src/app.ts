@@ -20,6 +20,7 @@ type Activity = {
 
 // Received posts and followers
 let receivedPosts: { text: string; actor: string }[] = [];
+let receivedSporeActions: { text: string; actor: string }[] = [];
 const followers = new Set<string>();
 
 // Environment variables with defaults
@@ -61,6 +62,11 @@ app.post(`/users/${AP_BACKEND_NAME}/inbox`, async (req, res) => {
     if (activity.type === "Create" && activity.object) {
         console.log(`Received post: ${JSON.stringify(activity.object)}`);
         receivedPosts.push({text: activity.object.content, actor: activity.actor }); // Store received post
+        if (activity.object.content.includes("#spore")) {
+            console.log("Its a spore!");
+            const contentWithoutSpore = activity.object.content.replace(/#spore/g, "").trim();
+            receivedSporeActions.push({text: contentWithoutSpore, actor: activity.actor });
+        }
         res.status(200).json({ message: "Post received" });
     } else if (activity.type === "Follow" && activity.object && activity.actor) {
         // Basic validation of the Follow activity
@@ -105,7 +111,22 @@ app.get("/statuses", (req, res) => {
     res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
     res.json({ statuses: receivedPosts });
     receivedPosts = [];
-    res.sendStatus(200);
+});
+
+// Endpoint to post a spore message
+app.post("/spore-actions", async (req, res) => {
+    const reqBody = req.body;
+    await sendSporeActionToPeerServer(reqBody["status"]);
+    res.status(200).json({ message: "Posted spore to activity pub server.", id: 0 });
+});
+
+// Endpoint to post a spore message
+app.get("/spore-actions", async (req, res) => {
+    res.header("Access-Control-Allow-Origin", "*");
+    res.header('Access-Control-Allow-Methods', 'DELETE, PUT');
+    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+    res.json({ "spore-actions": receivedSporeActions });
+    receivedSporeActions = [];
 });
 
 // Endpoint to view the current server user profile
@@ -160,6 +181,10 @@ const sendPostToPeerServer = async (content: string) => {
     }
 };
 
+const sendSporeActionToPeerServer = async (content: string) => {
+    sendPostToPeerServer(content + " #spore");
+}
+
 // Helper function to generate an 'Accept' activity
 const createAcceptActivity = (actorUri: any, followActivity: any) => {
     return {
@@ -170,7 +195,7 @@ const createAcceptActivity = (actorUri: any, followActivity: any) => {
     };
 };
 
-const sendFollowRequest = async () => {
+const sendFollowRequestToAllPeerServers = async () => {
     if (!allApPeerServers || !allApPeerServerNames) {
         console.error("Peer server or peer server name not set. Cannot send follow request.");
         return false;
@@ -220,22 +245,27 @@ const sendFollowRequest = async () => {
     return succeeded;
 };
 
-function exit() {
-    server.close((err) => {
-        console.log('server closed');
-        process.exit(err ? 1 : 0);
-    });
+async function attemptFollowRequest() {
+    try {
+        const didSucceed = await sendFollowRequestToAllPeerServers();
+        if (!didSucceed) {
+            console.log("Follow request failed. Retrying in 20 seconds...");
+            setTimeout(attemptFollowRequest, 20000);
+        } else {
+            console.log("Follow requests to peer servers succeeded.");
+        }
+    } catch (error) {
+        console.error("Error during follow request:", error);
+        console.log("Retrying in 20 seconds...");
+        setTimeout(attemptFollowRequest, 20000);
+    }
 }
 
 // Trigger the follow request
 setTimeout(() => {
-        sendFollowRequest().then((didSucceed) => {
-            if (!didSucceed) {
-                exit();
-            }
-        });
+        attemptFollowRequest();
         sendPostToPeerServer("Hello, this is a post from " + AP_BACKEND_NAME);
-    }, randomIntFromInterval(5000, 20000)
+    }, randomIntFromInterval(2000, 10000)
 );
 
 function randomIntFromInterval(min: number, max: number) { // min and max included

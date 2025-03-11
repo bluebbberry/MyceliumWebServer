@@ -5,6 +5,7 @@ import logging
 from dotenv import load_dotenv
 import random
 import json
+from spore_action import SporeAction
 
 load_dotenv()
 logging.basicConfig(level=logging.INFO)
@@ -146,3 +147,68 @@ class MastodonClient:
                 print("Unexpected response format:", response_json)
         except ValueError as e:
             print("Failed to parse JSON response:", e)
+
+    def post_spore_status(self, spore_action):
+        status_text = json.dumps({
+            "spore_type": spore_action.spore_type,
+            "args": spore_action.args
+        })
+
+        # url = f"{self.instance_url}/api/v1/statuses"
+        url = f"http://{self.ap_server}:{self.ap_server_port}/spore-actions"
+        logging.info("Post spore action to: " + url)
+        payload = {'status': status_text, "actor": self.musicRecommendationFungus.fungus_name}
+        headers = {
+            'Authorization': f'Bearer {self.api_token}',
+            'Content-Type': 'application/json'
+        }
+
+        try:
+            response = requests.post(url, headers=headers, json=payload)
+            response.raise_for_status()
+            logging.info(f"Posted to Mastodon: {status_text}")
+            return response.json()
+        except requests.exceptions.RequestException as e:
+            logging.error(f"Error posting status: {e}")
+            return None
+
+    def fetch_latest_spore_actions(self):
+        base_url = f"http://{self.ap_server}:{self.ap_server_port}"
+
+        headers = {
+            'Authorization': f'Bearer {self.api_token}',
+            'Accept': 'application/json'
+        }
+
+        params = {
+            'type': 'statuses',
+            'tag': "spore",
+            'limit': 30
+        }
+
+        response = requests.get(f"{base_url}/spore-actions",
+                                headers=headers,
+                                params=params)
+
+        if response.status_code == 200:
+            logging.info("Parsing response element:\n" + json.dumps(response.json(), indent=2))
+
+            # Step 1: Extract spore-actions field (which is a string)
+            spore_actions = response.json()["spore-actions"]
+
+            logging.info(f"Found {len(spore_actions)} latest spore action posts")
+            received_spore_actions = []
+
+            for status in spore_actions:
+                logging.info(status)
+
+                # Step 3: Extract and parse 'text' field
+                spore_action_dict = json.loads(status["text"])
+
+                # Step 4: Create the SporeAction object
+                received_spore_actions.append(SporeAction(spore_action_dict["spore_type"], spore_action_dict["args"]))
+
+            return received_spore_actions
+        else:
+            logging.error(f"Error: {response.status_code}")
+            return None

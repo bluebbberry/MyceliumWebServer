@@ -13,6 +13,8 @@ from dotenv import load_dotenv
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 import string
+from spore_manager import SporeManager
+from spore_action import SporeAction
 
 load_dotenv()
 
@@ -30,6 +32,8 @@ FUNGUS_ID = int(os.getenv("FUNGUS_ID", 0))
 NUM_OF_FUNGI = int(os.getenv("NUM_OF_FUNGI", 1))
 FUNGUS_FRONTEND_PORT = int(os.getenv("FUNGUS_FRONTEND_PORT", 3000)) + FUNGUS_ID
 FUNGUS_BACKEND_PORT = int(os.getenv("FUNGUS_BACKEND_PORT", 5000)) + FUNGUS_ID
+FUSEKI_SERVER_URL = os.getenv("FUSEKI_SERVER_URL")
+FUSEKI_DATABASE_NAME = os.getenv("FUSEKI_DATABASE_NAME")
 
 FEEDBACK_THRESHOLD = float(os.getenv("FEEDBACK_THRESHOLD", 0.5))
 SLEEP_TIME = float(os.getenv("SLEEP_TIME", 42300))
@@ -46,6 +50,11 @@ class MusicRecommendationFungus:
         self.fungus_name = self.generate_fungus_name()
         self.profile_picture_code = self.generate_random_code()
         self.knowledge_graph.insert_fungus_data(FUNGUS_ID, self.fungus_name, FUNGUS_FRONTEND_PORT)
+        self.spore_manager = SporeManager(self.mastodon_client)
+        fuseki_url = FUSEKI_SERVER_URL
+        database = FUSEKI_DATABASE_NAME
+        self.update_url = f"{fuseki_url}/{database}/update"
+        self.link_to_model = f"{fuseki_url}/{database}/query"
         # default sleep time: 42300
         self.sleep_time = SLEEP_TIME
         logging.info(f"[CONFIG] Feedback threshold set to {self.feedback_threshold}")
@@ -63,6 +72,8 @@ class MusicRecommendationFungus:
     def start(self):
         switch_team = True
         found_initial_team = False
+        # post initial link to model
+        self.spore_manager.post_spore_action(SporeAction("JOIN_GROUP", [ self.link_to_model ]))
         i = 0
         while True:
             logging.info(f"[START] Starting epoche {i} (at {datetime.datetime.now()})")
@@ -70,21 +81,34 @@ class MusicRecommendationFungus:
                 if switch_team or not found_initial_team:
                     self.mastodon_client.post_status(f"[SPORE] Searching for a new learning group ...")
                     logging.info("[CHECK] Searching for a new fungus group")
-                    messages, random_mycelial_tag = self.mastodon_client.get_statuses_from_random_mycelial_tag()
-                    link_to_model = self.knowledge_graph.look_for_new_fungus_group_in_statuses(messages, random_mycelial_tag)
-                    self.mastodon_client.post_status(f"[SPORE] Joined new group: {link_to_model}")
-                    self.knowledge_graph.look_for_song_data_in_statuses_to_insert(messages)
-                    self.knowledge_graph.on_found_group_to_join(link_to_model)
-                else:
-                    logging.info("[WAIT] No new groups found.")
-                    self.mastodon_client.post_status(f"[SPORE] No new learning group found. Going to sleep.")
-                    link_to_model = None
+                    #messages, random_mycelial_tag = self.mastodon_client.get_statuses_from_random_mycelial_tag()
 
-                if link_to_model is not None:
+                    self.spore_manager.fetch_spore_actions()
+                    spore_actions = self.spore_manager.get_spore_actions()
+                    join_spore_action = self.filter_spore_actions_by_type(spore_actions, 'JOIN_GROUP')
+                    #link_to_model = self.knowledge_graph.look_for_new_fungus_group_in_statuses(messages, random_mycelial_tag)
+                    if join_spore_action and len(join_spore_action) > 0:
+                        self.link_to_model = join_spore_action[0].args[0]
+                        self.mastodon_client.post_status(f"[SPORE] Joined new group: {self.link_to_model}")
+                        #self.knowledge_graph.look_for_song_data_in_statuses_to_insert(messages)
+                        #self.knowledge_graph.on_found_group_to_join(self.link_to_model)
+                    else:
+                        logging.info("[WAIT] No group to join found.")
+                        self.mastodon_client.post_status(f"[SPORE] No initial learning group found. Going to sleep.")
+                elif not switch_team:
+                    # send invite to join group
+                    self.spore_manager.post_spore_action(SporeAction("JOIN_GROUP", [ self.link_to_model ]))
+                    self.mastodon_client.post_status(f"[SPORE] Invited node to join group: {self.link_to_model}")
+                else:
+                    logging.info("[WAIT] No initial groups found.")
+                    self.mastodon_client.post_status(f"[SPORE] No initial learning group found. Going to sleep.")
+                    self.link_to_model = None
+
+                if self.link_to_model is not None:
                     logging.info("[TRAINING] New fungus group detected, initiating training")
                     self.mastodon_client.post_status(f"[SPORE] Started new training epoche.")
                     self.train_model()
-                    all_models = self.knowledge_graph.fetch_all_model_from_knowledge_base(link_to_model)
+                    all_models = self.knowledge_graph.fetch_all_model_from_knowledge_base(self.link_to_model)
                     logging.info(f"Received models from other nodes (size: {len(all_models)})")
                     self.mastodon_client.post_status(f"[SPORE] Finished training and received model from other nodes.")
                     aggregated_model_state = self.knowledge_graph.aggregate_model_states(self.machine_learning_service.model.get_state(), all_models)
@@ -92,15 +116,18 @@ class MusicRecommendationFungus:
                     self.machine_learning_service.model.set_state(aggregated_model_state)
                     self.mastodon_client.post_status(f"[SPORE] Deployed aggregated model.")
                     logging.info("[SAVING] Deployed aggregated model as new model")
+                else:
+                    logging.error("The model is none")
 
                 feedback = self.answer_user_feedback()
                 logging.info(f"[FEEDBACK] Received feedback: {feedback}")
 
                 switch_team = self.decide_whether_to_switch_team(feedback)
                 if switch_team:
-                    self.mastodon_client.post_status(f"[SPORE] Deceided to switch the learning group.")
+                    self.mastodon_client.post_status(f"[SPORE] Decided to switch the learning group.")
+                    self.link_to_model = None
                 else:
-                    self.mastodon_client.post_status(f"[SPORE] Deceided against switching groups.")
+                    self.mastodon_client.post_status(f"[SPORE] Decided against switching groups.")
 
                 self.evolve_behavior(feedback)
 
@@ -165,6 +192,9 @@ class MusicRecommendationFungus:
         if isinstance(recommendations, (list, tuple)):
             recommendations = [rec.tolist() if hasattr(rec, 'tolist') else rec for rec in recommendations]
         return recommendations
+
+    def filter_spore_actions_by_type(self, spore_actions, spore_type):
+        return list(filter(lambda e: e.spore_type == spore_type, spore_actions))
 
 
 logging.info("[STARTUP] Launching MusicRecommendationFungus instance")

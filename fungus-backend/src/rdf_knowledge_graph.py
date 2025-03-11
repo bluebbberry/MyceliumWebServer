@@ -13,9 +13,10 @@ load_dotenv()
 logging.basicConfig(level=logging.INFO)
 
 FUSEKI_SERVER_URL = os.getenv("FUSEKI_SERVER_URL")
+FUSEKI_DATABASE_NAME = os.getenv("FUSEKI_DATABASE_NAME")
 
 class RDFKnowledgeGraph:
-    def __init__(self, mastodon_client, fuseki_url=FUSEKI_SERVER_URL, dataset="my-knowledge-base"):
+    def __init__(self, mastodon_client, fuseki_url=FUSEKI_SERVER_URL, dataset=FUSEKI_DATABASE_NAME):
         self.update_url = f"{fuseki_url}/{dataset}/update"
         self.query_url = f"{fuseki_url}/{dataset}/query"
         self.fuseki_url = fuseki_url + "/" + dataset
@@ -285,7 +286,7 @@ class RDFKnowledgeGraph:
         """
         Retrieves all model parameters stored in the Fuseki server and decodes them.
         """
-        sparql = SPARQLWrapper(self.query_url)
+        sparql = SPARQLWrapper(link_to_model)
         sparql_select_query = '''
         PREFIX ex: <http://example.org/>
         PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
