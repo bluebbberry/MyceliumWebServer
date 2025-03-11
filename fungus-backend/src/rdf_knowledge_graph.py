@@ -329,10 +329,16 @@ class RDFKnowledgeGraph:
         # Extract states and convert tensors to numpy arrays for averaging
         state_keys = current_model_state.keys()
         aggregated_state = {k: current_model_weight * current_model_state[k].numpy() for k in state_keys}
+        reference_shapes = {k: v.shape for k, v in current_model_state.items()}
 
         # Add the other models with a lower weight
         for model in all_model_states:
             for k in state_keys:
+                model_tensor = model["modelState"][k].numpy()
+                # Check if the shape matches the expected shape
+                if model_tensor.shape != reference_shapes[k]:
+                    print(f"Shape mismatch for key '{k}': expected {reference_shapes[k]}, got {model_tensor.shape}. Skipping this model.")
+                    continue  # Skip adding this model
                 aggregated_state[k] += (1 - current_model_weight) * model["modelState"][k].numpy() / len(all_model_states)
 
         # Convert back to tensors
