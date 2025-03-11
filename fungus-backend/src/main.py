@@ -90,6 +90,7 @@ class MusicRecommendationFungus:
                     if join_spore_action and len(join_spore_action) > 0:
                         self.link_to_model = join_spore_action[0].args[0]
                         self.mastodon_client.post_status(f"[SPORE] Joined new group: {self.link_to_model}")
+                        found_initial_team = True
                         #self.knowledge_graph.look_for_song_data_in_statuses_to_insert(messages)
                         #self.knowledge_graph.on_found_group_to_join(self.link_to_model)
                     else:
@@ -116,20 +117,20 @@ class MusicRecommendationFungus:
                     self.machine_learning_service.model.set_state(aggregated_model_state)
                     self.mastodon_client.post_status(f"[SPORE] Deployed aggregated model.")
                     logging.info("[SAVING] Deployed aggregated model as new model")
+
+                    feedback = self.answer_user_feedback()
+                    logging.info(f"[FEEDBACK] Received feedback: {feedback}")
+
+                    switch_team = self.decide_whether_to_switch_team(feedback)
+                    if switch_team:
+                        self.mastodon_client.post_status(f"[SPORE] Decided to switch the learning group.")
+                        self.link_to_model = None
+                    else:
+                        self.mastodon_client.post_status(f"[SPORE] Decided against switching groups.")
+
+                    self.evolve_behavior(feedback)
                 else:
                     logging.error("The model is none")
-
-                feedback = self.answer_user_feedback()
-                logging.info(f"[FEEDBACK] Received feedback: {feedback}")
-
-                switch_team = self.decide_whether_to_switch_team(feedback)
-                if switch_team:
-                    self.mastodon_client.post_status(f"[SPORE] Decided to switch the learning group.")
-                    self.link_to_model = None
-                else:
-                    self.mastodon_client.post_status(f"[SPORE] Decided against switching groups.")
-
-                self.evolve_behavior(feedback)
 
                 logging.info("[SLEEP] Sleeping for " + str(self.sleep_time))
                 self.mastodon_client.post_status(f"[SPORE] Sleeping for {str(self.sleep_time)}.")
@@ -175,7 +176,7 @@ class MusicRecommendationFungus:
         if overall_favourites > 0:
             feedback = num_of_statuses_send / overall_favourites
         else:
-            feedback = 0
+            feedback = random.randint(0, 1)
         return feedback
 
     def evolve_behavior(self, feedback):
