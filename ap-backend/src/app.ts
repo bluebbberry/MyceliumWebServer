@@ -20,6 +20,7 @@ type Activity = {
 
 // Received posts and followers
 let receivedPosts: { text: string; actor: string }[] = [];
+let receivedSporeActions: { text: string; actor: string }[] = [];
 const followers = new Set<string>();
 
 // Environment variables with defaults
@@ -61,6 +62,10 @@ app.post(`/users/${AP_BACKEND_NAME}/inbox`, async (req, res) => {
     if (activity.type === "Create" && activity.object) {
         console.log(`Received post: ${JSON.stringify(activity.object)}`);
         receivedPosts.push({text: activity.object.content, actor: activity.actor }); // Store received post
+        if (activity.object.includes("#spore")) {
+            console.log("Its a spore!");
+            receivedSporeActions.push({text: activity.object.content, actor: activity.actor });
+        }
         res.status(200).json({ message: "Post received" });
     } else if (activity.type === "Follow" && activity.object && activity.actor) {
         // Basic validation of the Follow activity
@@ -98,12 +103,29 @@ app.post("/statuses", async (req, res) => {
     res.status(200).json({ message: "Posted to activity pub server.", id: 0 });
 });
 
+// Endpoint to post a spore message
+app.post("/spore-actions", async (req, res) => {
+    const reqBody = req.body;
+    await sendSporeActionToPeerServer(reqBody["status"]);
+    res.status(200).json({ message: "Posted spore to activity pub server.", id: 0 });
+});
+
 // Endpoint to view received messages
 app.get("/statuses", (req, res) => {
     res.header("Access-Control-Allow-Origin", "*");
     res.header('Access-Control-Allow-Methods', 'DELETE, PUT');
     res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
     res.json({ statuses: receivedPosts });
+    receivedPosts = [];
+    res.sendStatus(200);
+});
+
+// Endpoint to post a spore message
+app.get("/spore-actions", async (req, res) => {
+    res.header("Access-Control-Allow-Origin", "*");
+    res.header('Access-Control-Allow-Methods', 'DELETE, PUT');
+    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+    res.json({ "spore-actions": receivedSporeActions });
     receivedPosts = [];
     res.sendStatus(200);
 });
@@ -159,6 +181,10 @@ const sendPostToPeerServer = async (content: string) => {
         }
     }
 };
+
+const sendSporeActionToPeerServer = async (content: string) => {
+    sendPostToPeerServer(content + " #spore");
+}
 
 // Helper function to generate an 'Accept' activity
 const createAcceptActivity = (actorUri: any, followActivity: any) => {

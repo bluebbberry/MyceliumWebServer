@@ -5,6 +5,7 @@ import logging
 from dotenv import load_dotenv
 import random
 import json
+from spore_action import SporeAction
 
 load_dotenv()
 logging.basicConfig(level=logging.INFO)
@@ -146,3 +147,61 @@ class MastodonClient:
                 print("Unexpected response format:", response_json)
         except ValueError as e:
             print("Failed to parse JSON response:", e)
+
+    def post_spore_status(self, spore_action):
+        status_text = json_dump({
+            "spore_type": spore_action.spore_type,
+            "args": spore_action.args
+        })
+
+        # url = f"{self.instance_url}/api/v1/statuses"
+        url = f"http://{self.ap_server}:{self.ap_server_port}/spore-actions"
+        logging.info("Post spore action to: " + url)
+        payload = {'status': status_text, "actor": self.musicRecommendationFungus.fungus_name}
+        headers = {
+            'Authorization': f'Bearer {self.api_token}',
+            'Content-Type': 'application/json'
+        }
+
+        try:
+            response = requests.post(url, headers=headers, json=payload)
+            response.raise_for_status()
+            logging.info(f"Posted to Mastodon: {status_text}")
+            return response.json()
+        except requests.exceptions.RequestException as e:
+            logging.error(f"Error posting status: {e}")
+            return None
+
+    def fetch_latest_spore_actions(self):
+        base_url = f"http://{self.ap_server}:{self.ap_server_port}"
+
+        if hashtag is None:
+            hashtag = self.nutrial_tag
+
+        headers = {
+            'Authorization': f'Bearer {self.api_token}',
+            'Accept': 'application/json'
+        }
+
+        params = {
+            'type': 'statuses',
+            'tag': hashtag,
+            'limit': 30
+        }
+
+        response = requests.get(f"{base_url}/spore-actions",
+                                headers=headers,
+                                params=params)
+
+        if response.status_code == 200:
+            data = response.json()
+            logging.info(f"Found {len(data)} latest spore action posts")
+            statuses = data
+            received_spore_actions = []
+            for status in statuses:
+                spore_action_dict = json.loads(status.content)
+                received_spore_actions.push(SporeAction(spore_action_dict.spore_type, spore_action_dict.args))
+            return received_spore_actions
+        else:
+            logging.error(f"Error: {response.status_code}")
+            return None
