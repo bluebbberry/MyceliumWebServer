@@ -77,7 +77,7 @@ class MastodonClient:
             return statuses
         else:
             logging.error(f"Error: {response.status_code}")
-            return None
+            return []
 
     def get_statuses_from_random_mycelial_tag(self):
         messages = []
