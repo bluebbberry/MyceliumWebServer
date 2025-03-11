@@ -124,10 +124,10 @@ class MusicRecommendationFungus:
 
                 switch_team = self.decide_whether_to_switch_team(feedback)
                 if switch_team:
-                    self.mastodon_client.post_status(f"[SPORE] Deceided to switch the learning group.")
+                    self.mastodon_client.post_status(f"[SPORE] Decided to switch the learning group.")
                     self.link_to_model = None
                 else:
-                    self.mastodon_client.post_status(f"[SPORE] Deceided against switching groups.")
+                    self.mastodon_client.post_status(f"[SPORE] Decided against switching groups.")
 
                 self.evolve_behavior(feedback)
 
