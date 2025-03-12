@@ -1,0 +1,187 @@
+services:
+
+# --------------------------------------------------------
+# ------------ FUNGUS FUNCTIONALITY CONTAINER ------------
+# --------------------------------------------------------
+  fungus-backend0:
+    build: fungus-backend
+    restart: always
+    environment:
+      - FUNGUS_ID=0
+    env_file: ".env"
+    ports:
+      - 5000:5000
+    depends_on: [ fuseki ]
+
+  fungus-backend1:
+    build: fungus-backend
+    restart: always
+    environment:
+      - FUNGUS_ID=1
+    env_file: ".env"
+    ports:
+      - 5001:5001
+    depends_on: [ fuseki ]
+
+  fungus-backend2:
+    build: fungus-backend
+    restart: always
+    environment:
+      - FUNGUS_ID=2
+    env_file: ".env"
+    ports:
+      - 5002:5002
+    depends_on: [ fuseki ]
+
+  fungus-backend3:
+    build: fungus-backend
+    restart: always
+    environment:
+      - FUNGUS_ID=3
+    env_file: ".env"
+    ports:
+      - 5003:5003
+    depends_on: [ fuseki ]
+
+  fungus-backend4:
+    build: fungus-backend
+    restart: always
+    environment:
+      - FUNGUS_ID=4
+    env_file: ".env"
+    ports:
+      - 5004:5004
+    depends_on: [ fuseki ]
+
+  fungus-backend5:
+    build: fungus-backend
+    restart: always
+    environment:
+      - FUNGUS_ID=5
+    env_file: ".env"
+    ports:
+      - 5005:5005
+    depends_on: [ fuseki ]
+
+  fungus-backend6:
+    build: fungus-backend
+    restart: always
+    environment:
+      - FUNGUS_ID=6
+    env_file: ".env"
+    ports:
+      - 5006:5006
+    depends_on: [ fuseki ]
+
+  fungus-backend7:
+    build: fungus-backend
+    restart: always
+    environment:
+      - FUNGUS_ID=7
+    env_file: ".env"
+    ports:
+      - 5007:5007
+    depends_on: [ fuseki ]
+
+# -------------------------------------------------
+# ------------ ACTIVITY PUB CONTAINER -------------
+# -------------------------------------------------
+  ap-backend0:
+    build:
+      context: ap-backend
+    ports:
+      - 3010:3010
+    restart: always
+    environment:
+      - FUNGUS_ID=0
+    env_file: ".env"
+    depends_on: [ fungus-backend0 ]
+
+  ap-backend1:
+    build:
+      context: ap-backend
+    ports:
+      - 3011:3011
+    restart: always
+    environment:
+      - FUNGUS_ID=1
+    env_file: ".env"
+    depends_on: [ fungus-backend1 ]
+
+  ap-backend2:
+    build:
+      context: ap-backend
+    ports:
+      - 3012:3012
+    restart: always
+    environment:
+      - FUNGUS_ID=2
+    env_file: ".env"
+    depends_on: [ fungus-backend2 ]
+
+  ap-backend3:
+    build:
+      context: ap-backend
+    ports:
+      - 3013:3013
+    restart: always
+    environment:
+      - FUNGUS_ID=3
+    env_file: ".env"
+    depends_on: [ fungus-backend2 ]
+
+  ap-backend4:
+    build:
+      context: ap-backend
+    ports:
+      - 3014:3014
+    restart: always
+    environment:
+      - FUNGUS_ID=4
+    env_file: ".env"
+    depends_on: [ fungus-backend0 ]
+
+  ap-backend5:
+    build:
+      context: ap-backend
+    ports:
+      - 3015:3015
+    restart: always
+    environment:
+      - FUNGUS_ID=5
+    env_file: ".env"
+    depends_on: [ fungus-backend1 ]
+
+  ap-backend6:
+    build:
+      context: ap-backend
+    ports:
+      - 3016:3016
+    restart: always
+    environment:
+      - FUNGUS_ID=6
+    env_file: ".env"
+    depends_on: [ fungus-backend2 ]
+
+  ap-backend7:
+    build:
+      context: ap-backend
+    ports:
+      - 3017:3017
+    restart: always
+    environment:
+      - FUNGUS_ID=7
+    env_file: ".env"
+    depends_on: [ fungus-backend0 ]
+
+# ---------------------------------------------------
+# ------------ KNOWLEDGE BASE CONTAINER -------------
+# ---------------------------------------------------
+  fuseki:
+    image: "stain/jena-fuseki"
+    restart: always
+    ports:
+      - 3030:3030
+    environment:
+      - FUSEKI_DATASET_1=my-knowledge-base
+      - ADMIN_PASSWORD=pw123

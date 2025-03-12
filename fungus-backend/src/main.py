@@ -30,7 +30,6 @@ CORS(app)
 
 FUNGUS_ID = int(os.getenv("FUNGUS_ID", 0))
 NUM_OF_FUNGI = int(os.getenv("NUM_OF_FUNGI", 1))
-FUNGUS_FRONTEND_PORT = int(os.getenv("FUNGUS_FRONTEND_PORT", 3000)) + FUNGUS_ID
 FUNGUS_BACKEND_PORT = int(os.getenv("FUNGUS_BACKEND_PORT", 5000)) + FUNGUS_ID
 FUSEKI_SERVER_URL = os.getenv("FUSEKI_SERVER_URL")
 FUSEKI_DATABASE_NAME = os.getenv("FUSEKI_DATABASE_NAME")
@@ -49,12 +48,12 @@ class MusicRecommendationFungus:
         self.feedback_threshold = FEEDBACK_THRESHOLD
         self.fungus_name = self.generate_fungus_name()
         self.profile_picture_code = self.generate_random_code()
-        self.knowledge_graph.insert_fungus_data(FUNGUS_ID, self.fungus_name, FUNGUS_FRONTEND_PORT)
         self.spore_manager = SporeManager(self.mastodon_client)
         fuseki_url = FUSEKI_SERVER_URL
         database = FUSEKI_DATABASE_NAME
         self.update_url = f"{fuseki_url}/{database}/update"
         self.link_to_model = f"{fuseki_url}/{database}/query"
+        self.knowledge_graph.insert_fungus_data(FUNGUS_ID, self.fungus_name, self.link_to_model)
         # default sleep time: 42300
         self.sleep_time = SLEEP_TIME
         logging.info(f"[CONFIG] Feedback threshold set to {self.feedback_threshold}")
