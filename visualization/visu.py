@@ -47,16 +47,19 @@ def update(frame, logs, ax):
     graph = build_graph(logs, time_threshold)
     pos = nx.spring_layout(graph)
 
-    nx.draw(graph, pos, with_labels=True, node_color='lightblue', edge_color='gray', node_size=1000, font_size=10, ax=ax)
+    purple_nodes = [node for node in graph.nodes() if str(node).lower().startswith('fungus')]
+    other_nodes = [node for node in graph.nodes() if not str(node).lower().startswith('fungus')]
+    nx.draw(graph, pos, with_labels=True, nodelist=purple_nodes, node_color='sandybrown', edge_color='gray', node_size=1000, font_size=10, ax=ax)
+    nx.draw(graph, pos, with_labels=True, nodelist=other_nodes, node_color='peru', edge_color='gray', node_size=1000, font_size=10, ax=ax)
 
-    ax.set_title(f"Mycelial AI Agent Learning Groups at {time_threshold}")
+    ax.set_title(f"Mycelial Web Learning Groups at {time_threshold}")
 
 def animate_graph(logs, output_file="animation.gif"):
     fig, ax = plt.subplots(figsize=(8, 6))
-    ani = animation.FuncAnimation(fig, update, frames=len(logs), fargs=(logs, ax), interval=1000)
+    ani = animation.FuncAnimation(fig, update, frames=len(logs), fargs=(logs, ax), interval=500)
 
     # Save as GIF using Pillow (PIL)
-    ani.save(output_file, writer="pillow", fps=2)
+    ani.save(output_file, writer="pillow", fps=1)
     print(f"Animation saved as {output_file}")
 
 if __name__ == "__main__":
