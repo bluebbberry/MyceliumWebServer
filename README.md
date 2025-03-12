@@ -2,6 +2,8 @@
 
 # MyceliumWebServer
 
+![example_animiation](docs/example_animation.gif)
+
 Currently, the mycelium web server consists of four parts:
 
 - Fungus-Backend, which contains the core fungus functionality by implementing the SPORE protocol
