@@ -152,7 +152,7 @@ class MastodonClient:
         status_text = json.dumps({
             "spore_type": spore_action.spore_type,
             "args": spore_action.args,
-            "actor": f"fungus-{FUNGUS_ID}"
+            "actor": f"fungus-node-{FUNGUS_ID}"
         })
 
         # url = f"{self.instance_url}/api/v1/statuses"
