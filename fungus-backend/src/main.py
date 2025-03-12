@@ -47,8 +47,8 @@ class MusicRecommendationFungus:
         self.knowledge_graph.insert_songs_from_csv('songs.csv')
         self.machine_learning_service = MLService(self.knowledge_graph, user_ratings_csv='user_ratings.csv')
         self.knowledge_graph.insert_model_state(MODEL_NAME, self.machine_learning_service.model.get_state())
-        self.learning_group = str(uuid.uuid4())
-        self.knowledge_graph.update_learning_groups(MODEL_NAME, None, self.learning_group)
+        self.learning_group_id = str(uuid.uuid4())
+        self.knowledge_graph.insert_learning_group(self.learning_group_id, MODEL_NAME)
         self.feedback_threshold = FEEDBACK_THRESHOLD
         self.fungus_name = self.generate_fungus_name()
         self.profile_picture_code = self.generate_random_code()
@@ -76,7 +76,7 @@ class MusicRecommendationFungus:
         switch_team = True
         found_initial_team = False
         # post initial link to model
-        self.spore_manager.post_spore_action(SporeAction("JOIN_GROUP", [self.link_to_database, self.learning_group], f"fungus-node-{FUNGUS_ID}"))
+        self.spore_manager.post_spore_action(SporeAction("JOIN_GROUP", [self.link_to_database, self.learning_group_id], f"fungus-node-{FUNGUS_ID}"))
         i = 0
         while True:
             logging.info(f"[START] Starting epoche {i} (at {datetime.now()})")
@@ -92,11 +92,11 @@ class MusicRecommendationFungus:
                     #link_to_model = self.knowledge_graph.look_for_new_fungus_group_in_statuses(messages, random_mycelial_tag)
                     if join_spore_action and len(join_spore_action) > 0:
                         self.link_to_database = join_spore_action[0].args[0]
-                        old_learning_group = self.learning_group
-                        self.learning_group = join_spore_action[0].args[1]
-                        self.knowledge_graph.update_learning_groups(MODEL_NAME, old_learning_group, self.learning_group)
+                        old_learning_group = self.learning_group_id
+                        self.learning_group_id = join_spore_action[0].args[1]
+                        self.knowledge_graph.remove_from_old_learning_group_and_add_to_new(MODEL_NAME, old_learning_group, self.learning_group_id)
                         self.mastodon_client.post_status(f"[SPORE] Joined new group: {self.link_to_database}")
-                        logging.info({"node_id": f"fungus-node-{FUNGUS_ID}", "event": "message_received", "details": {"from": join_spore_action[0].actor, "model": self.learning_group }, "timestamp": datetime.today().strftime('%Y-%m-%dT%H:%M:%S')})
+                        logging.info({"node_id": f"fungus-node-{FUNGUS_ID}", "event": "message_received", "details": {"from": join_spore_action[0].actor, "model": self.learning_group_id}, "timestamp": datetime.today().strftime('%Y-%m-%dT%H:%M:%S')})
                         found_initial_team = True
                         #self.knowledge_graph.look_for_song_data_in_statuses_to_insert(messages)
                         #self.knowledge_graph.on_found_group_to_join(self.link_to_model)
@@ -105,7 +105,7 @@ class MusicRecommendationFungus:
                         self.mastodon_client.post_status(f"[SPORE] No initial learning group found. Going to sleep.")
                 elif not switch_team:
                     # send invite to join group
-                    self.spore_manager.post_spore_action(SporeAction("JOIN_GROUP", [self.link_to_database, self.learning_group], f"fungus-node-{FUNGUS_ID}"))
+                    self.spore_manager.post_spore_action(SporeAction("JOIN_GROUP", [self.link_to_database, self.learning_group_id], f"fungus-node-{FUNGUS_ID}"))
                     self.mastodon_client.post_status(f"[SPORE] Invited node to join group: {self.link_to_database}")
                 else:
                     logging.info("[WAIT] No initial groups found.")
@@ -116,7 +116,7 @@ class MusicRecommendationFungus:
                     logging.info("[TRAINING] New fungus group detected, initiating training")
                     self.mastodon_client.post_status(f"[SPORE] Started new training epoche.")
                     self.train_model()
-                    learning_group_model_names = self.knowledge_graph.fetch_model_names_of_current_learning_group(self.learning_group)
+                    learning_group_model_names = self.knowledge_graph.fetch_current_learning_group(self.learning_group_id)
                     all_models_of_my_learning_group = self.knowledge_graph.fetch_all_model_from_knowledge_base_with_name(self.link_to_database, learning_group_model_names)
                     logging.info(f"Received models from other nodes (size: {len(all_models_of_my_learning_group)})")
                     self.mastodon_client.post_status(f"[SPORE] Finished training and received model from other nodes.")

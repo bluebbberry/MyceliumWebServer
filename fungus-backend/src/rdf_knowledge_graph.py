@@ -405,14 +405,160 @@ class RDFKnowledgeGraph:
         return False
       return True
 
-    def update_learning_groups(self, model_name, old_learning_group, new_learning_group):
-        # TODO
-        pass
+    def insert_learning_group(self, learning_group_id: str, model_name: str):
+        """
+        Inserts a learning group into the knowledge base.
 
-    def fetch_model_names_of_current_learning_group(self, learning_group):
-        # TODO
-        return []
+        Args:
+            learning_group_id: Unique identifier for the learning group
+            model_name: first model name of this group
+        """
+        # Prepare the SPARQL query to insert the learning group data
+        sparql = SPARQLWrapper(self.update_url)
+        sparql_insert_query = f'''
+        PREFIX ex: <http://example.org/>
+        PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+    
+        INSERT DATA {{
+            ex:learningGroup_{learning_group_id} a ex:LearningGroup ;
+                                   ex:groupId "{learning_group_id}" ;
+                                   ex:hasModel "{model_name}" .
+        '''
+
+        sparql.setQuery(sparql_insert_query)
+        sparql.setMethod('POST')
+        sparql.setReturnFormat(JSON)
+        sparql.setCredentials("admin", "pw123")
+
+        try:
+            sparql.query()
+            print(f"Learning group with ID '{learning_group_id}' inserted successfully.")
+        except Exception as e:
+            print(f"Error inserting learning group: {e}")
+
+    # Remove model_name from old_learning_group and adds it to new_learning_group
+    def remove_from_old_learning_group_and_add_to_new(self, model_name, old_learning_group_id, new_learning_group_id):
+        """
+        Removes a model_name from old_learning_group and adds it to new_learning_group.
+
+        Args:
+            model_name: The model name to transfer
+            old_learning_group_id: ID of the source learning group
+            new_learning_group_id: ID of the target learning group
+        """
+        # First, remove the model from the old group
+        sparql = SPARQLWrapper(self.update_url)
+        remove_query = f'''
+        PREFIX ex: <http://example.org/>
+        
+        DELETE {{
+            ex:learningGroup_{old_learning_group_id} ex:hasModel "{model_name}" .
+        }}
+        '''
+        sparql.setQuery(remove_query)
+        sparql.setMethod('POST')
+        sparql.setReturnFormat(JSON)
+        sparql.setCredentials("admin", "pw123")
+
+        try:
+            sparql.query()
+            print(f"Successfully removed {model_name} from group {old_learning_group_id}")
+        except Exception as e:
+            print(f"Error removing model from old group: {e}")
+            return False
+
+        # Then, add the model to the new group
+        sparql = SPARQLWrapper(self.update_url)
+        add_query = f'''
+        PREFIX ex: <http://example.org/>
+        
+        INSERT DATA {{
+            ex:learningGroup_{new_learning_group_id} ex:hasModel "{model_name}" .
+        }}
+        '''
+        sparql.setQuery(add_query)
+        sparql.setMethod('POST')
+        sparql.setReturnFormat(JSON)
+        sparql.setCredentials("admin", "pw123")
+
+        try:
+            sparql.query()
+            print(f"Successfully added {model_name} to group {new_learning_group_id}")
+            return True
+        except Exception as e:
+            print(f"Error adding model to new group: {e}")
+            return False
+
+    def fetch_current_learning_group(self, learning_group_id):
+        """
+        Fetches all model names associated with a learning group.
+
+        Args:
+            learning_group_id: ID of the learning group to fetch
+
+        Returns:
+            List of model names in the learning group
+        """
+        sparql = SPARQLWrapper(self.update_url)
+        query = f'''
+        PREFIX ex: <http://example.org/>
+        
+        SELECT ?modelName
+        WHERE {{
+            ex:learningGroup_{learning_group_id} ex:hasModel ?modelName .
+        }}
+        '''
+        sparql.setQuery(query)
+        sparql.setReturnFormat(JSON)
+        sparql.setCredentials("admin", "pw123")
+
+        try:
+            results = sparql.query().convert()
+            model_names = [binding['modelName'].value for binding in results['results']['bindings']]
+            return model_names
+        except Exception as e:
+            print(f"Error fetching learning group: {e}")
+            return []
 
     def fetch_all_model_from_knowledge_base_with_name(self, link_to_database, learning_group_model_names):
-        # TODO
-        return []
+        """
+        Fetches models from the knowledge base based on their names.
+
+        Args:
+            link_to_database: URL of the Fuseki database
+            learning_group_model_names: List of model names to fetch
+
+        Returns:
+            List of dictionaries containing model information
+        """
+        sparql = SPARQLWrapper(link_to_database)
+        query = '''
+        PREFIX ex: <http://example.org/>
+        
+        SELECT ?modelName ?modelState
+        WHERE {
+            ?model a ex:ContentBasedModel ;
+                   ex:modelName ?modelName ;
+                   ex:modelState ?modelState .
+            FILTER (?modelName IN (%s))
+        }
+        ''' % ', '.join(f'"{name}"' for name in learning_group_model_names)
+
+        sparql.setQuery(query)
+        sparql.setReturnFormat(JSON)
+        sparql.setHTTPAuth('BASIC')
+        sparql.setCredentials("admin", "pw123")
+
+        try:
+            results = sparql.query().convert()
+            models = []
+            for binding in results['results']['bindings']:
+                model_info = {
+                    'name': binding['modelName'].value,
+                    'state': binding['modelState'].value
+                }
+                models.append(model_info)
+            return models
+        except Exception as e:
+            print(f"Error fetching models: {e}")
+            return []
