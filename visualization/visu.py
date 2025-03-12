@@ -14,7 +14,7 @@ def load_logs(log_file):
     return sorted(logs, key=lambda x: x["timestamp"])
 
 def build_graph(logs, time_threshold):
-    G = nx.Graph()
+    graph = nx.Graph()
 
     for log in logs:
         if log["timestamp"] > time_threshold:
@@ -25,16 +25,20 @@ def build_graph(logs, time_threshold):
         details = log.get("details", {})
 
         if event == "message_sent" and "to" in details:
+            if graph.has_node(node_id):
+                graph.remove_node(node_id)
             target_node = details["to"]
             target_model = details["model"]
-            G.add_edge(node_id, target_model)
+            graph.add_edge(node_id, target_model)
 
         if event == "message_received" and "from" in details:
+            if graph.has_node(node_id):
+                graph.remove_node(node_id)
             source_node = details["from"]
             target_model = details["model"]
-            G.add_edge(node_id, target_model)
+            graph.add_edge(node_id, target_model)
 
-    return G
+    return graph
 
 def update(frame, logs, ax):
     ax.clear()
