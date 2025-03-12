@@ -15,6 +15,7 @@ import string
 from spore_manager import SporeManager
 from spore_action import SporeAction
 from datetime import datetime
+import uuid
 
 load_dotenv()
 
@@ -36,6 +37,7 @@ FUSEKI_DATABASE_NAME = os.getenv("FUSEKI_DATABASE_NAME")
 
 FEEDBACK_THRESHOLD = float(os.getenv("FEEDBACK_THRESHOLD", 0.5))
 SLEEP_TIME = float(os.getenv("SLEEP_TIME", 42300))
+MODEL_NAME = "model-" + str(FUNGUS_ID)
 
 class MusicRecommendationFungus:
     def __init__(self):
@@ -44,8 +46,9 @@ class MusicRecommendationFungus:
         self.knowledge_graph = RDFKnowledgeGraph(mastodon_client=self.mastodon_client)
         self.knowledge_graph.insert_songs_from_csv('songs.csv')
         self.machine_learning_service = MLService(self.knowledge_graph, user_ratings_csv='user_ratings.csv')
-        self.model_name = "model-" + str(FUNGUS_ID)
-        self.knowledge_graph.insert_model_state(self.model_name, self.machine_learning_service.model.get_state())
+        self.knowledge_graph.insert_model_state(MODEL_NAME, self.machine_learning_service.model.get_state())
+        self.learning_group_id = str(uuid.uuid4())
+        self.knowledge_graph.insert_learning_group(self.learning_group_id, MODEL_NAME)
         self.feedback_threshold = FEEDBACK_THRESHOLD
         self.fungus_name = self.generate_fungus_name()
         self.profile_picture_code = self.generate_random_code()
@@ -53,8 +56,8 @@ class MusicRecommendationFungus:
         fuseki_url = FUSEKI_SERVER_URL
         database = FUSEKI_DATABASE_NAME
         self.update_url = f"{fuseki_url}/{database}/update"
-        self.link_to_model = f"{fuseki_url}/{database}/query"
-        self.knowledge_graph.insert_fungus_data(FUNGUS_ID, self.fungus_name, self.link_to_model)
+        self.link_to_database = f"{fuseki_url}/{database}/query"
+        self.knowledge_graph.insert_fungus_data(FUNGUS_ID, self.fungus_name, self.link_to_database)
         # default sleep time: 42300
         self.sleep_time = SLEEP_TIME
         logging.info(f"[CONFIG] Feedback threshold set to {self.feedback_threshold}")
@@ -73,7 +76,7 @@ class MusicRecommendationFungus:
         switch_team = True
         found_initial_team = False
         # post initial link to model
-        self.spore_manager.post_spore_action(SporeAction("JOIN_GROUP", [ self.link_to_model, self.model_name ], f"fungus-node-{FUNGUS_ID}"))
+        self.spore_manager.post_spore_action(SporeAction("JOIN_GROUP", [self.link_to_database, self.learning_group_id], f"fungus-node-{FUNGUS_ID}"))
         i = 0
         while True:
             logging.info(f"[START] Starting epoche {i} (at {datetime.now()})")
@@ -88,10 +91,12 @@ class MusicRecommendationFungus:
                     join_spore_action = self.filter_spore_actions_by_type(spore_actions, 'JOIN_GROUP')
                     #link_to_model = self.knowledge_graph.look_for_new_fungus_group_in_statuses(messages, random_mycelial_tag)
                     if join_spore_action and len(join_spore_action) > 0:
-                        self.link_to_model = join_spore_action[0].args[0]
-                        self.model_name = join_spore_action[0].args[1]
-                        self.mastodon_client.post_status(f"[SPORE] Joined new group: {self.link_to_model}")
-                        logging.info({"node_id": f"fungus-node-{FUNGUS_ID}", "event": "message_received", "details": {"from": join_spore_action[0].actor, "model": self.model_name }, "timestamp": datetime.today().strftime('%Y-%m-%dT%H:%M:%S')})
+                        self.link_to_database = join_spore_action[0].args[0]
+                        old_learning_group = self.learning_group_id
+                        self.learning_group_id = join_spore_action[0].args[1]
+                        self.knowledge_graph.remove_from_old_learning_group_and_add_to_new(MODEL_NAME, old_learning_group, self.learning_group_id)
+                        self.mastodon_client.post_status(f"[SPORE] Joined new group: {self.link_to_database}")
+                        logging.info({"node_id": f"fungus-node-{FUNGUS_ID}", "event": "message_received", "details": {"from": join_spore_action[0].actor, "model": self.learning_group_id}, "timestamp": datetime.today().strftime('%Y-%m-%dT%H:%M:%S')})
                         found_initial_team = True
                         #self.knowledge_graph.look_for_song_data_in_statuses_to_insert(messages)
                         #self.knowledge_graph.on_found_group_to_join(self.link_to_model)
@@ -100,21 +105,22 @@ class MusicRecommendationFungus:
                         self.mastodon_client.post_status(f"[SPORE] No initial learning group found. Going to sleep.")
                 elif not switch_team:
                     # send invite to join group
-                    self.spore_manager.post_spore_action(SporeAction("JOIN_GROUP", [ self.link_to_model, self.model_name ], f"fungus-node-{FUNGUS_ID}"))
-                    self.mastodon_client.post_status(f"[SPORE] Invited node to join group: {self.link_to_model}")
+                    self.spore_manager.post_spore_action(SporeAction("JOIN_GROUP", [self.link_to_database, self.learning_group_id], f"fungus-node-{FUNGUS_ID}"))
+                    self.mastodon_client.post_status(f"[SPORE] Invited node to join group: {self.link_to_database}")
                 else:
                     logging.info("[WAIT] No initial groups found.")
                     self.mastodon_client.post_status(f"[SPORE] No initial learning group found. Going to sleep.")
-                    self.link_to_model = None
+                    self.link_to_database = None
 
-                if self.link_to_model is not None:
+                if self.link_to_database is not None:
                     logging.info("[TRAINING] New fungus group detected, initiating training")
                     self.mastodon_client.post_status(f"[SPORE] Started new training epoche.")
                     self.train_model()
-                    all_models = self.knowledge_graph.fetch_all_model_from_knowledge_base(self.link_to_model)
-                    logging.info(f"Received models from other nodes (size: {len(all_models)})")
+                    learning_group_model_names = self.knowledge_graph.fetch_current_learning_group(self.learning_group_id)
+                    all_models_of_my_learning_group = self.knowledge_graph.fetch_all_model_from_knowledge_base_with_name(self.link_to_database, learning_group_model_names)
+                    logging.info(f"Received models from other nodes (size: {len(all_models_of_my_learning_group)})")
                     self.mastodon_client.post_status(f"[SPORE] Finished training and received model from other nodes.")
-                    aggregated_model_state = self.knowledge_graph.aggregate_model_states(self.machine_learning_service.model.get_state(), all_models)
+                    aggregated_model_state = self.knowledge_graph.aggregate_model_states(self.machine_learning_service.model.get_state(), all_models_of_my_learning_group)
                     # deploy new model
                     self.machine_learning_service.model.set_state(aggregated_model_state)
                     self.mastodon_client.post_status(f"[SPORE] Deployed aggregated model.")
@@ -126,7 +132,7 @@ class MusicRecommendationFungus:
                     switch_team = self.decide_whether_to_switch_team(feedback)
                     if switch_team:
                         self.mastodon_client.post_status(f"[SPORE] Decided to switch the learning group.")
-                        self.link_to_model = None
+                        self.link_to_database = None
                     else:
                         self.mastodon_client.post_status(f"[SPORE] Decided against switching groups.")
 
@@ -148,7 +154,7 @@ class MusicRecommendationFungus:
             self.machine_learning_service.train_model()
             model = self.machine_learning_service.model
             logging.info(f"[RESULT] Model trained successfully.")
-            self.knowledge_graph.save_model(self.model_name, model)
+            self.knowledge_graph.save_model(MODEL_NAME, model)
             logging.info("[STORE] Model saved to RDF Knowledge Graph")
             self.mastodon_client.post_status(f"[SPORE] Model updated.")
             logging.info("[NOTIFY] Status posted to Mastodon")

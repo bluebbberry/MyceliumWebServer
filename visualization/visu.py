@@ -44,16 +44,16 @@ def update(frame, logs, ax):
     ax.clear()
 
     time_threshold = logs[frame]["timestamp"]
-    G = build_graph(logs, time_threshold)
-    pos = nx.spring_layout(G)
+    graph = build_graph(logs, time_threshold)
+    pos = nx.spring_layout(graph)
 
-    nx.draw(G, pos, with_labels=True, node_color='lightblue', edge_color='gray', node_size=1000, font_size=10, ax=ax)
+    nx.draw(graph, pos, with_labels=True, node_color='lightblue', edge_color='gray', node_size=1000, font_size=10, ax=ax)
 
     ax.set_title(f"Mycelial AI Agent Learning Groups at {time_threshold}")
 
 def animate_graph(logs, output_file="animation.gif"):
     fig, ax = plt.subplots(figsize=(8, 6))
-    ani = animation.FuncAnimation(fig, update, frames=len(logs), fargs=(logs, ax), interval=500)
+    ani = animation.FuncAnimation(fig, update, frames=len(logs), fargs=(logs, ax), interval=1000)
 
     # Save as GIF using Pillow (PIL)
     ani.save(output_file, writer="pillow", fps=2)
