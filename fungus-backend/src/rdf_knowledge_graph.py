@@ -404,3 +404,15 @@ class RDFKnowledgeGraph:
       except ValueError as e:
         return False
       return True
+
+    def update_learning_groups(self, model_name, old_learning_group, new_learning_group):
+        # TODO
+        pass
+
+    def fetch_model_names_of_current_learning_group(self, learning_group):
+        # TODO
+        return []
+
+    def fetch_all_model_from_knowledge_base_with_name(self, link_to_database, learning_group_model_names):
+        # TODO
+        return []
