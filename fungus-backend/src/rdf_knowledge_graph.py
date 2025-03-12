@@ -423,6 +423,7 @@ class RDFKnowledgeGraph:
             ex:learningGroup_{learning_group_id} a ex:LearningGroup ;
                                    ex:groupId "{learning_group_id}" ;
                                    ex:hasModel "{model_name}" .
+        }}
         '''
 
         sparql.setQuery(sparql_insert_query)
