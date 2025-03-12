@@ -26,11 +26,13 @@ def build_graph(logs, time_threshold):
 
         if event == "message_sent" and "to" in details:
             target_node = details["to"]
-            G.add_edge(node_id, target_node)
+            target_model = details["model"]
+            G.add_edge(node_id, target_model)
 
         if event == "message_received" and "from" in details:
             source_node = details["from"]
-            G.add_edge(node_id, source_node)
+            target_model = details["model"]
+            G.add_edge(node_id, target_model)
 
     return G
 
