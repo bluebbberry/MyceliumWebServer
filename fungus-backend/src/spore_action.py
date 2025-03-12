@@ -4,6 +4,7 @@
 # - ACCEPT_JOIN
 
 class SporeAction:
-  def __init__(self, spore_type, args):
+  def __init__(self, spore_type, args, actor):
     self.spore_type = spore_type
     self.args = args
+    self.actor = actor
