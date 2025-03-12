@@ -72,7 +72,7 @@ class MusicRecommendationFungus:
         switch_team = True
         found_initial_team = False
         # post initial link to model
-        self.spore_manager.post_spore_action(SporeAction("JOIN_GROUP", [ self.link_to_model ], f"fungus-{FUNGUS_ID}"))
+        self.spore_manager.post_spore_action(SporeAction("JOIN_GROUP", [ self.link_to_model ], f"fungus-node-{FUNGUS_ID}"))
         i = 0
         while True:
             logging.info(f"[START] Starting epoche {i} (at {datetime.now()})")
@@ -89,7 +89,7 @@ class MusicRecommendationFungus:
                     if join_spore_action and len(join_spore_action) > 0:
                         self.link_to_model = join_spore_action[0].args[0]
                         self.mastodon_client.post_status(f"[SPORE] Joined new group: {self.link_to_model}")
-                        logging.info({"node_id": f"fungus-{FUNGUS_ID}", "event": "message_received", "details": {"from": join_spore_action[0].actor, "model": "model-1" }, "timestamp": datetime.today().strftime('%Y-%m-%dT%H:%M:%S')})
+                        logging.info({"node_id": f"fungus-node-{FUNGUS_ID}", "event": "message_received", "details": {"from": join_spore_action[0].actor, "model": "model-1" }, "timestamp": datetime.today().strftime('%Y-%m-%dT%H:%M:%S')})
                         found_initial_team = True
                         #self.knowledge_graph.look_for_song_data_in_statuses_to_insert(messages)
                         #self.knowledge_graph.on_found_group_to_join(self.link_to_model)
@@ -98,7 +98,7 @@ class MusicRecommendationFungus:
                         self.mastodon_client.post_status(f"[SPORE] No initial learning group found. Going to sleep.")
                 elif not switch_team:
                     # send invite to join group
-                    self.spore_manager.post_spore_action(SporeAction("JOIN_GROUP", [ self.link_to_model ], f"fungus-{FUNGUS_ID}"))
+                    self.spore_manager.post_spore_action(SporeAction("JOIN_GROUP", [ self.link_to_model ], f"fungus-node-{FUNGUS_ID}"))
                     self.mastodon_client.post_status(f"[SPORE] Invited node to join group: {self.link_to_model}")
                 else:
                     logging.info("[WAIT] No initial groups found.")
