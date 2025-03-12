@@ -44,7 +44,8 @@ class MusicRecommendationFungus:
         self.knowledge_graph = RDFKnowledgeGraph(mastodon_client=self.mastodon_client)
         self.knowledge_graph.insert_songs_from_csv('songs.csv')
         self.machine_learning_service = MLService(self.knowledge_graph, user_ratings_csv='user_ratings.csv')
-        self.knowledge_graph.insert_model_state("my-model", self.machine_learning_service.model.get_state())
+        self.model_name = "model-" + str(FUNGUS_ID)
+        self.knowledge_graph.insert_model_state(self.model_name, self.machine_learning_service.model.get_state())
         self.feedback_threshold = FEEDBACK_THRESHOLD
         self.fungus_name = self.generate_fungus_name()
         self.profile_picture_code = self.generate_random_code()
@@ -72,7 +73,7 @@ class MusicRecommendationFungus:
         switch_team = True
         found_initial_team = False
         # post initial link to model
-        self.spore_manager.post_spore_action(SporeAction("JOIN_GROUP", [ self.link_to_model ], f"fungus-node-{FUNGUS_ID}"))
+        self.spore_manager.post_spore_action(SporeAction("JOIN_GROUP", [ self.link_to_model, self.model_name ], f"fungus-node-{FUNGUS_ID}"))
         i = 0
         while True:
             logging.info(f"[START] Starting epoche {i} (at {datetime.now()})")
@@ -88,8 +89,9 @@ class MusicRecommendationFungus:
                     #link_to_model = self.knowledge_graph.look_for_new_fungus_group_in_statuses(messages, random_mycelial_tag)
                     if join_spore_action and len(join_spore_action) > 0:
                         self.link_to_model = join_spore_action[0].args[0]
+                        self.model_name = join_spore_action[0].args[1]
                         self.mastodon_client.post_status(f"[SPORE] Joined new group: {self.link_to_model}")
-                        logging.info({"node_id": f"fungus-node-{FUNGUS_ID}", "event": "message_received", "details": {"from": join_spore_action[0].actor, "model": "model-1" }, "timestamp": datetime.today().strftime('%Y-%m-%dT%H:%M:%S')})
+                        logging.info({"node_id": f"fungus-node-{FUNGUS_ID}", "event": "message_received", "details": {"from": join_spore_action[0].actor, "model": self.model_name }, "timestamp": datetime.today().strftime('%Y-%m-%dT%H:%M:%S')})
                         found_initial_team = True
                         #self.knowledge_graph.look_for_song_data_in_statuses_to_insert(messages)
                         #self.knowledge_graph.on_found_group_to_join(self.link_to_model)
@@ -98,7 +100,7 @@ class MusicRecommendationFungus:
                         self.mastodon_client.post_status(f"[SPORE] No initial learning group found. Going to sleep.")
                 elif not switch_team:
                     # send invite to join group
-                    self.spore_manager.post_spore_action(SporeAction("JOIN_GROUP", [ self.link_to_model ], f"fungus-node-{FUNGUS_ID}"))
+                    self.spore_manager.post_spore_action(SporeAction("JOIN_GROUP", [ self.link_to_model, self.model_name ], f"fungus-node-{FUNGUS_ID}"))
                     self.mastodon_client.post_status(f"[SPORE] Invited node to join group: {self.link_to_model}")
                 else:
                     logging.info("[WAIT] No initial groups found.")
@@ -146,7 +148,7 @@ class MusicRecommendationFungus:
             self.machine_learning_service.train_model()
             model = self.machine_learning_service.model
             logging.info(f"[RESULT] Model trained successfully.")
-            self.knowledge_graph.save_model("my-model", model)
+            self.knowledge_graph.save_model(self.model_name, model)
             logging.info("[STORE] Model saved to RDF Knowledge Graph")
             self.mastodon_client.post_status(f"[SPORE] Model updated.")
             logging.info("[NOTIFY] Status posted to Mastodon")
