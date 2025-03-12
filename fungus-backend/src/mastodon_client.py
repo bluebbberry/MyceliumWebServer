@@ -151,7 +151,8 @@ class MastodonClient:
     def post_spore_status(self, spore_action):
         status_text = json.dumps({
             "spore_type": spore_action.spore_type,
-            "args": spore_action.args
+            "args": spore_action.args,
+            "actor": f"fungus-{FUNGUS_ID}"
         })
 
         # url = f"{self.instance_url}/api/v1/statuses"
@@ -206,7 +207,7 @@ class MastodonClient:
                 spore_action_dict = json.loads(status["text"])
 
                 # Step 4: Create the SporeAction object
-                received_spore_actions.append(SporeAction(spore_action_dict["spore_type"], spore_action_dict["args"]))
+                received_spore_actions.append(SporeAction(spore_action_dict["spore_type"], spore_action_dict["args"], spore_action_dict["actor"]))
 
             return received_spore_actions
         else:
