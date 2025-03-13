@@ -38,6 +38,13 @@ def build_graph(logs, time_threshold):
             target_model = details["model"][:6]
             graph.add_edge(node_id, target_model)
 
+    # Remove models with no edges
+    model_nodes = [node for node in graph.nodes()
+                   if not str(node).lower().startswith('fungus')]
+    for model in model_nodes:
+        if graph.degree(model) == 0:
+            graph.remove_node(model)
+
     return graph
 
 def update(frame, logs, ax):
