@@ -32,9 +32,9 @@ class TestMusicRecommendationFungus(unittest.TestCase):
 
     @patch('main.random.random', return_value=0.05)
     def test_evolve_behavior_mutation(self, mock_random):
-        old_threshold = self.music_fungus.feedback_threshold
+        old_threshold = self.music_fungus.fitness_threshold
         self.music_fungus.evolve_behavior(0.3)
-        self.assertNotEqual(self.music_fungus.feedback_threshold, old_threshold)
+        self.assertNotEqual(self.music_fungus.fitness_threshold, old_threshold)
 
 if __name__ == "__main__":
     unittest.main()
