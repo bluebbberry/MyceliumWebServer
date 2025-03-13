@@ -2,9 +2,19 @@
 
 # MyceliumWebServer
 
+## Preview
+
+In the graphic, every fungus node is a running instance of this repository, which together train an AI model (mycelium web server and fungus node are in the following used exchangeable).
+
 ![example_animiation](docs/example_animation.gif)
 
-Currently, the mycelium web server consists of four parts:
+The AI model can be accessed via the UI of the fungus node to get song recommendations.
+
+A demo of browsing a mycelium web with two fungi can be seen [here](https://makertube.net/w/doRDfT2ZibYaF9F7EiGCoK).
+
+## Architecture
+
+Currently, a fungus node consists of four parts:
 
 - Fungus-Backend, which contains the core fungus functionality by implementing the SPORE protocol
 - ActivityPub-Backend, which manages the communication with other fungus nodes over ActivityPub
@@ -12,8 +22,6 @@ Currently, the mycelium web server consists of four parts:
 - A Knowledge Base (in this case Jena Fuseki), which stores the fungus' knowledge and its trained model
 
 ![fungus-architecture.png](docs/fungus-architecture.png)
-
-A demo of browsing a mycelium web with two fungi can be seen [here](https://makertube.net/w/doRDfT2ZibYaF9F7EiGCoK).
 
 # What is the MyceliumWeb?
 
