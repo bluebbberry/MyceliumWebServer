@@ -56,8 +56,8 @@ def update(frame, logs, ax):
 
     fungus_nodes = [node for node in graph.nodes() if str(node).lower().startswith('fungus')]
     model_nodes = [node for node in graph.nodes() if not str(node).lower().startswith('fungus')]
-    nx.draw(graph, pos, with_labels=True, nodelist=fungus_nodes, node_color='sandybrown', edge_color='gray', node_size=1000, font_size=10, ax=ax)
-    nx.draw(graph, pos, with_labels=False, nodelist=model_nodes, node_color='purple', edge_color='gray', node_size=3000, font_size=1, ax=ax)
+    nx.draw(graph, pos, with_labels=True, nodelist=fungus_nodes, node_color='purple', edge_color='gray', node_size=1000, font_size=10, ax=ax)
+    nx.draw(graph, pos, with_labels=False, nodelist=model_nodes, node_color='sandybrown', edge_color='gray', node_size=3000, font_size=1, ax=ax)
 
     ax.set_title(f"Mycelial Web Learning Groups at {time_threshold}")
 
