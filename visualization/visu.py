@@ -28,14 +28,14 @@ def build_graph(logs, time_threshold):
             if graph.has_node(node_id):
                 graph.remove_node(node_id)
             target_node = details["to"]
-            target_model = details["model"]
+            target_model = details["model"][:6]
             graph.add_edge(node_id, target_model)
 
         if event == "message_received" and "from" in details:
             if graph.has_node(node_id):
                 graph.remove_node(node_id)
             source_node = details["from"]
-            target_model = details["model"]
+            target_model = details["model"][:6]
             graph.add_edge(node_id, target_model)
 
     return graph
@@ -45,12 +45,12 @@ def update(frame, logs, ax):
 
     time_threshold = logs[frame]["timestamp"]
     graph = build_graph(logs, time_threshold)
-    pos = nx.spring_layout(graph)
+    pos = nx.spring_layout(graph, k=0.7)
 
-    purple_nodes = [node for node in graph.nodes() if str(node).lower().startswith('fungus')]
-    other_nodes = [node for node in graph.nodes() if not str(node).lower().startswith('fungus')]
-    nx.draw(graph, pos, with_labels=True, nodelist=purple_nodes, node_color='sandybrown', edge_color='gray', node_size=1000, font_size=10, ax=ax)
-    nx.draw(graph, pos, with_labels=True, nodelist=other_nodes, node_color='peru', edge_color='gray', node_size=1000, font_size=10, ax=ax)
+    fungus_nodes = [node for node in graph.nodes() if str(node).lower().startswith('fungus')]
+    model_nodes = [node for node in graph.nodes() if not str(node).lower().startswith('fungus')]
+    nx.draw(graph, pos, with_labels=True, nodelist=fungus_nodes, node_color='sandybrown', edge_color='gray', node_size=1000, font_size=10, ax=ax)
+    nx.draw(graph, pos, with_labels=False, nodelist=model_nodes, node_color='purple', edge_color='gray', node_size=3000, font_size=1, ax=ax)
 
     ax.set_title(f"Mycelial Web Learning Groups at {time_threshold}")
 
