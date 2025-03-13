@@ -12,7 +12,7 @@ However, that's only on the surface (the fungus fruit so to speak). Underneath, 
 
 ![example_animiation](docs/example_animation.gif)
 
-In the graphic, every fungus node is a running instance of this repository, which together train an AI model (mycelium web server and fungus node are in the following used exchangeable).
+In the graphic, every fungus node is a running instance of this repository, which together train AI models (mycelium web server and fungus node are in the following used exchangeable).
 
 The fungus nodes communicate over the protocol that builds the Fediverse (ActivityPub); so theoretically, all fungus nodes can be accessed over the Fediverse.
 A demo of browsing a mycelium web with two fungus nodes and viewing them from the social web can be seen [here](https://makertube.net/w/doRDfT2ZibYaF9F7EiGCoK).
