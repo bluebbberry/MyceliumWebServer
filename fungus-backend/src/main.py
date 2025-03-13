@@ -16,6 +16,8 @@ from spore_manager import SporeManager
 from spore_action import SporeAction
 from datetime import datetime
 import uuid
+import csv
+from fitness_calculator import FitnessCalculator
 
 load_dotenv()
 
@@ -53,6 +55,7 @@ class MusicRecommendationFungus:
         self.fungus_name = self.generate_fungus_name()
         self.profile_picture_code = self.generate_random_code()
         self.spore_manager = SporeManager(self.mastodon_client)
+        self.fitness_calculator = FitnessCalculator(machine_learning_service=self.machine_learning_service)
         fuseki_url = FUSEKI_SERVER_URL
         database = FUSEKI_DATABASE_NAME
         self.update_url = f"{fuseki_url}/{database}/update"
@@ -128,10 +131,10 @@ class MusicRecommendationFungus:
                     self.mastodon_client.post_status(f"[SPORE] Deployed aggregated model.")
                     logging.info("[SAVING] Deployed aggregated model as new model")
 
-                    feedback = self.answer_user_feedback()
-                    logging.info(f"[FEEDBACK] Received feedback: {feedback}")
+                    # feedback = self.answer_user_feedback()
+                    # logging.info(f"[FEEDBACK] Received feedback: {feedback}")
 
-                    fitness = self.calculate_fitness(feedback)
+                    fitness = self.fitness_calculator.calculate_fitness()
                     switch_team = self.decide_whether_to_switch_team(fitness)
                     if switch_team:
                         self.mastodon_client.post_status(f"[SPORE] Decided to switch the learning group.")
@@ -139,7 +142,7 @@ class MusicRecommendationFungus:
                     else:
                         self.mastodon_client.post_status(f"[SPORE] Decided against switching groups.")
 
-                    self.evolve_behavior(feedback)
+                    self.evolve_behavior()
                 else:
                     logging.error("The model is none")
 
@@ -190,7 +193,7 @@ class MusicRecommendationFungus:
             feedback = random.randint(0, 1)
         return feedback
 
-    def evolve_behavior(self, feedback):
+    def evolve_behavior(self):
         mutation_chance = 0.1
         if random.random() < mutation_chance:
             logging.info("Randomly mutated")
@@ -207,10 +210,6 @@ class MusicRecommendationFungus:
 
     def filter_spore_actions_by_type(self, spore_actions, spore_type):
         return list(filter(lambda e: e.spore_type == spore_type, spore_actions))
-
-    def calculate_fitness(self, feedback):
-        return feedback
-
 
 logging.info("[STARTUP] Launching MusicRecommendationFungus instance")
 music_service = MusicRecommendationFungus()
