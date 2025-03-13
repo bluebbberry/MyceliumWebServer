@@ -4,13 +4,18 @@
 
 ## Preview
 
-In the graphic, every fungus node is a running instance of this repository, which together train an AI model (mycelium web server and fungus node are in the following used exchangeable).
+The mycelium web server can be accessed over its UI to give out song recommendations:
+
+![fungus_preview](docs/fungus_preview.png)
+
+However, that's only on the surface (the fungus fruit so to speak). Underneath, the fungus builds on a complex web of AI agents that collaboratively train AI models:
 
 ![example_animiation](docs/example_animation.gif)
 
-The AI model can be accessed via the UI of the fungus node to get song recommendations.
+In the graphic, every fungus node is a running instance of this repository, which together train AI models (mycelium web server and fungus node are in the following used exchangeable).
 
-A demo of browsing a mycelium web with two fungi can be seen [here](https://makertube.net/w/doRDfT2ZibYaF9F7EiGCoK).
+The fungus nodes communicate over the protocol that builds the Fediverse (ActivityPub); so theoretically, all fungus nodes can be accessed over the Fediverse.
+A demo of browsing a mycelium web with two fungus nodes and viewing them from the social web can be seen [here](https://makertube.net/w/doRDfT2ZibYaF9F7EiGCoK).
 
 ## Architecture
 
