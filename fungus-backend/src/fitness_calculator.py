@@ -1,3 +1,4 @@
+import numpy as np
 import csv
 import random
 
@@ -6,6 +7,7 @@ class FitnessCalculator:
         self.csv_file = csv_file
         self.machine_learning_service = machine_learning_service
         self.songs = self._load_songs()
+        self.past_fitness_scores = []
 
     def _load_songs(self):
         songs = {}
@@ -18,27 +20,41 @@ class FitnessCalculator:
                 }
         return songs
 
-    def song_guess_was_correct(self, song_input, song_predicted):
+    def song_similarity_score(self, song_input, song_predicted):
         if song_input not in self.songs or song_predicted not in self.songs:
-            return False
+            return 0.0
 
-        return (self.songs[song_input]["genre"] == self.songs[song_predicted]["genre"] and
-                self.songs[song_input]["tempo"] == self.songs[song_predicted]["tempo"])
+        genre_match = self.songs[song_input]["genre"] == self.songs[song_predicted]["genre"]
+        tempo_diff = abs(self.songs[song_input]["tempo"] - self.songs[song_predicted]["tempo"])
 
-    def get_random_songs(self, count=5):
-        return random.sample(list(self.songs.keys()), min(count, len(self.songs)))
+        if genre_match and tempo_diff == 0:
+            return 1.0
+        elif genre_match and tempo_diff <= 5:
+            return 0.8
+        elif genre_match and tempo_diff <= 10:
+            return 0.5
+        elif not genre_match and tempo_diff <= 5:
+            return 0.3
+        else:
+            return 0.0
+
+    def get_random_songs(self):
+        test_size = max(10, len(self.songs) // 10)
+        return random.sample(list(self.songs.keys()), min(test_size, len(self.songs)))
 
     def calculate_fitness(self):
-        correct_guesses = 0
+        similarity_scores = []
         all_test_samples = self.get_random_songs()
+
         for test_song in all_test_samples:
             song_result = self.machine_learning_service.get_song_recommendations(test_song)[0]
-            if self.song_guess_was_correct(test_song, song_result):
-                correct_guesses += 1
-        correctness_ratio = correct_guesses / len(all_test_samples)
+            similarity_scores.append(self.song_similarity_score(test_song, song_result))
 
-        # Add random number
-        random_number = random.uniform(-0.5, 0.5)
+        correctness_ratio = np.mean(similarity_scores) if similarity_scores else 0.0
+        random_factor = random.uniform(-0.1, 0.1) * correctness_ratio
+        fitness_score = correctness_ratio + random_factor
 
-        # See whether it's under threshold or not
-        return correctness_ratio + random_number
+        self.past_fitness_scores.append(fitness_score)
+        smoothed_fitness = np.mean(self.past_fitness_scores[-5:])  # Use last 5 scores for smoothing
+
+        return smoothed_fitness
