@@ -77,6 +77,7 @@ class MusicRecommendationFungus:
         found_initial_team = False
         # post initial link to model
         self.spore_manager.post_spore_action(SporeAction("JOIN_GROUP", [self.link_to_database, self.learning_group_id], f"fungus-node-{FUNGUS_ID}"))
+        logging.info({"node_id": f"fungus-node-{FUNGUS_ID}", "event": "message_received", "details": {"from": f"fungus-node-{FUNGUS_ID}", "model": self.learning_group_id}, "timestamp": datetime.today().strftime('%Y-%m-%dT%H:%M:%S')})
         i = 0
         while True:
             logging.info(f"[START] Starting epoche {i} (at {datetime.now()})")
