@@ -35,7 +35,7 @@ FUNGUS_BACKEND_PORT = int(os.getenv("FUNGUS_BACKEND_PORT", 5000)) + FUNGUS_ID
 FUSEKI_SERVER_URL = os.getenv("FUSEKI_SERVER_URL")
 FUSEKI_DATABASE_NAME = os.getenv("FUSEKI_DATABASE_NAME")
 
-FEEDBACK_THRESHOLD = float(os.getenv("FEEDBACK_THRESHOLD", 0.5))
+FITNESS_THRESHOLD = float(os.getenv("FITNESS_THRESHOLD", 0.5))
 SLEEP_TIME = float(os.getenv("SLEEP_TIME", 42300))
 MODEL_NAME = "model-" + str(FUNGUS_ID)
 
@@ -49,7 +49,7 @@ class MusicRecommendationFungus:
         self.knowledge_graph.insert_model_state(MODEL_NAME, self.machine_learning_service.model.get_state())
         self.learning_group_id = str(uuid.uuid4())
         self.knowledge_graph.insert_learning_group(self.learning_group_id, MODEL_NAME)
-        self.feedback_threshold = FEEDBACK_THRESHOLD
+        self.fitness_threshold = FITNESS_THRESHOLD
         self.fungus_name = self.generate_fungus_name()
         self.profile_picture_code = self.generate_random_code()
         self.spore_manager = SporeManager(self.mastodon_client)
@@ -60,7 +60,7 @@ class MusicRecommendationFungus:
         self.knowledge_graph.insert_fungus_data(FUNGUS_ID, self.fungus_name, self.link_to_database)
         # default sleep time: 42300
         self.sleep_time = SLEEP_TIME
-        logging.info(f"[CONFIG] Feedback threshold set to {self.feedback_threshold}")
+        logging.info(f"[CONFIG] Feedback threshold set to {self.fitness_threshold}")
 
     def generate_fungus_name(self):
         fungus_prefixes = [
@@ -131,7 +131,8 @@ class MusicRecommendationFungus:
                     feedback = self.answer_user_feedback()
                     logging.info(f"[FEEDBACK] Received feedback: {feedback}")
 
-                    switch_team = self.decide_whether_to_switch_team(feedback)
+                    fitness = self.calculate_fitness(feedback)
+                    switch_team = self.decide_whether_to_switch_team(fitness)
                     if switch_team:
                         self.mastodon_client.post_status(f"[SPORE] Decided to switch the learning group.")
                         self.link_to_database = None
@@ -163,8 +164,8 @@ class MusicRecommendationFungus:
         except Exception as e:
             logging.error(f"[ERROR] Failed during training and deployment: {e}", exc_info=True)
 
-    def decide_whether_to_switch_team(self, feedback):
-        switch_decision = feedback < self.feedback_threshold
+    def decide_whether_to_switch_team(self, fitness):
+        switch_decision = fitness < self.fitness_threshold
         logging.info(f"[DECISION] Switch team: {switch_decision}")
         return switch_decision
 
@@ -194,9 +195,9 @@ class MusicRecommendationFungus:
         if random.random() < mutation_chance:
             logging.info("Randomly mutated")
             self.mastodon_client.post_status(f"[SPORE] Mutated.")
-            old_threshold = self.feedback_threshold
-            self.feedback_threshold *= random.uniform(0.9, 1.1)  # Randomly adjust threshold
-            logging.info(f"[EVOLVE] Feedback threshold mutated from {old_threshold} to {self.feedback_threshold}")
+            old_threshold = self.fitness_threshold
+            self.fitness_threshold *= random.uniform(0.9, 1.1)  # Randomly adjust threshold
+            logging.info(f"[EVOLVE] Feedback threshold mutated from {old_threshold} to {self.fitness_threshold}")
 
     def get_song_recommendations(self, song_name):
         recommendations = self.machine_learning_service.get_song_recommendations(song_name, 3)
@@ -206,6 +207,9 @@ class MusicRecommendationFungus:
 
     def filter_spore_actions_by_type(self, spore_actions, spore_type):
         return list(filter(lambda e: e.spore_type == spore_type, spore_actions))
+
+    def calculate_fitness(self, feedback):
+        return feedback
 
 
 logging.info("[STARTUP] Launching MusicRecommendationFungus instance")
