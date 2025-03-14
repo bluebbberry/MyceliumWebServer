@@ -110,8 +110,14 @@ class MLService:
         """Recommend the top N songs using the model's output for similarity calculation."""
         self.model.eval()  # Set the model to evaluation mode
 
-        # Get the index of the song based on the title
-        song_index = self.rdf_knowledge_graph.songs_data[self.rdf_knowledge_graph.songs_data['title'] == title].index[0]
+        # Get the song index based on title, with error handling
+        matching_songs = self.rdf_knowledge_graph.songs_data[self.rdf_knowledge_graph.songs_data['title'] == title]
+
+        if matching_songs.empty:
+            print(f"[ERROR] Song title '{title}' not found in dataset.")
+            return []  # Return an empty list instead of raising an error
+
+        song_index = matching_songs.index[0]
 
         # Convert song features into tensor for the model
         song_features = torch.tensor(self.features_encoded.iloc[song_index].values, dtype=torch.float32).unsqueeze(0)
