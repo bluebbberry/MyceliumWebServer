@@ -12,6 +12,7 @@
       <excludeFolder url="file://$MODULE_DIR$/ap-backend/fungus-backend/node_modules" />
       <excludeFolder url="file://$MODULE_DIR$/fungus-backend/.venv" />
       <excludeFolder url="file://$MODULE_DIR$/.venv" />
+      <excludeFolder url="file://$MODULE_DIR$/logs" />
     </content>
     <orderEntry type="jdk" jdkName="Python 3.12 (MyceliumWebServer)" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />

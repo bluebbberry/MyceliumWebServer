@@ -12,6 +12,8 @@ services:
     ports:
       - 5000:5000
     depends_on: [ fuseki ]
+    volumes:
+      - ./logs:/logs
 
   fungus-backend1:
     build: fungus-backend
@@ -22,6 +24,8 @@ services:
     ports:
       - 5001:5001
     depends_on: [ fuseki ]
+    volumes:
+      - ./logs:/logs
 
   fungus-backend2:
     build: fungus-backend
@@ -32,6 +36,8 @@ services:
     ports:
       - 5002:5002
     depends_on: [ fuseki ]
+    volumes:
+      - ./logs:/logs
 
 # -------------------------------------------------
 # ------------ ACTIVITY PUB CONTAINER -------------

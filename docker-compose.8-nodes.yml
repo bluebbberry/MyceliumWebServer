@@ -12,6 +12,8 @@ services:
     ports:
       - 5000:5000
     depends_on: [ fuseki ]
+    volumes:
+      - ./logs:/logs
 
   fungus-backend1:
     build: fungus-backend
@@ -22,6 +24,8 @@ services:
     ports:
       - 5001:5001
     depends_on: [ fuseki ]
+    volumes:
+      - ./logs:/logs
 
   fungus-backend2:
     build: fungus-backend
@@ -32,6 +36,8 @@ services:
     ports:
       - 5002:5002
     depends_on: [ fuseki ]
+    volumes:
+      - ./logs:/logs
 
   fungus-backend3:
     build: fungus-backend
@@ -42,6 +48,8 @@ services:
     ports:
       - 5003:5003
     depends_on: [ fuseki ]
+    volumes:
+      - ./logs:/logs
 
   fungus-backend4:
     build: fungus-backend
@@ -52,6 +60,8 @@ services:
     ports:
       - 5004:5004
     depends_on: [ fuseki ]
+    volumes:
+      - ./logs:/logs
 
   fungus-backend5:
     build: fungus-backend
@@ -62,6 +72,8 @@ services:
     ports:
       - 5005:5005
     depends_on: [ fuseki ]
+    volumes:
+      - ./logs:/logs
 
   fungus-backend6:
     build: fungus-backend
@@ -72,6 +84,8 @@ services:
     ports:
       - 5006:5006
     depends_on: [ fuseki ]
+    volumes:
+      - ./logs:/logs
 
   fungus-backend7:
     build: fungus-backend
@@ -82,6 +96,8 @@ services:
     ports:
       - 5007:5007
     depends_on: [ fuseki ]
+    volumes:
+      - ./logs:/logs
 
 # -------------------------------------------------
 # ------------ ACTIVITY PUB CONTAINER -------------
