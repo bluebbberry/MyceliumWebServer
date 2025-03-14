@@ -70,6 +70,6 @@ def animate_graph(logs, output_file="animation.gif"):
     print(f"Animation saved as {output_file}")
 
 if __name__ == "__main__":
-    log_file = "logs.json"
+    log_file = "filtered_logs.txt"
     logs = load_logs(log_file)
     animate_graph(logs)
