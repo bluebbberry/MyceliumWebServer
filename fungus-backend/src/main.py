@@ -21,8 +21,11 @@ from fitness_calculator import FitnessCalculator
 
 load_dotenv()
 
+FUNGUS_ID = int(os.getenv("FUNGUS_ID", 0))
+
 # Configure logging
 logging.basicConfig(
+    filename=f'/logs/fungus-{FUNGUS_ID}.log',
     level=logging.INFO,
     format="%(asctime)s - %(levelname)s - %(message)s"
 )
@@ -31,7 +34,6 @@ logging.basicConfig(
 app = Flask(__name__)
 CORS(app)
 
-FUNGUS_ID = int(os.getenv("FUNGUS_ID", 0))
 NUM_OF_FUNGI = int(os.getenv("NUM_OF_FUNGI", 1))
 FUNGUS_BACKEND_PORT = int(os.getenv("FUNGUS_BACKEND_PORT", 5000)) + FUNGUS_ID
 FUSEKI_SERVER_URL = os.getenv("FUSEKI_SERVER_URL")
@@ -169,7 +171,7 @@ class MusicRecommendationFungus:
 
     def decide_whether_to_switch_team(self, fitness):
         switch_decision = fitness < self.fitness_threshold
-        logging.info(f"[DECISION] Switch team: {switch_decision}")
+        logging.info(f"[DECISION] Switch team: {switch_decision} with fitness: {fitness} and fitness_threshold: {self.fitness_threshold}")
         return switch_decision
 
     def generate_random_code(self, length=16):

@@ -10,7 +10,15 @@ import csv
 import pandas as pd
 
 load_dotenv()
-logging.basicConfig(level=logging.INFO)
+
+FUNGUS_ID = int(os.getenv("FUNGUS_ID", 0))
+
+# Configure logging
+logging.basicConfig(
+    filename=f'/logs/fungus-{FUNGUS_ID}.log',
+    level=logging.INFO,
+    format="%(asctime)s - %(levelname)s - %(message)s"
+)
 
 FUSEKI_SERVER_URL = os.getenv("FUSEKI_SERVER_URL")
 FUSEKI_DATABASE_NAME = os.getenv("FUSEKI_DATABASE_NAME")

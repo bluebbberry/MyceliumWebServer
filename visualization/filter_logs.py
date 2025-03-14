@@ -16,18 +16,10 @@ def read_logs(input_file):
                 continue
 
             # Extract timestamp and validate format
-            match = re.match(r'^(\d{4}-\d{2}-\d{2}\s\d{2}:\d{2}:\d{2})\sINFO:root:', line)
+            match = re.match(r'^(\d{4}-\d{2}-\d{2}\s\d{2}:\d{2}:\d{2},\d{3})\s-\sINFO\s-\s', line)
 
             if not match:
                 print(f"Skipping invalid log format: {line}")
-                continue
-
-            # Validate timestamp format
-            try:
-                timestamp_str = match.group(1)
-                datetime.strptime(timestamp_str, '%Y-%m-%d %H:%M:%S')
-            except ValueError:
-                print(f"Skipping invalid timestamp format: {line}")
                 continue
 
             # Extract JSON part and convert quotes for valid parsing

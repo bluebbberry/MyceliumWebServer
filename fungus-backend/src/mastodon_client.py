@@ -8,9 +8,16 @@ import json
 from spore_action import SporeAction
 
 load_dotenv()
-logging.basicConfig(level=logging.INFO)
 
 FUNGUS_ID = int(os.getenv("FUNGUS_ID"))
+
+# Configure logging
+logging.basicConfig(
+    filename=f'/logs/fungus-{FUNGUS_ID}.log',
+    level=logging.INFO,
+    format="%(asctime)s - %(levelname)s - %(message)s"
+)
+
 AP_BACKEND_NAME = os.getenv("AP_BACKEND_NAME") + str(FUNGUS_ID)
 AP_BACKEND_PORT = int(os.getenv("AP_BACKEND_PORT")) + FUNGUS_ID
 

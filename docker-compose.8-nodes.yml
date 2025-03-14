@@ -8,80 +8,104 @@ services:
     restart: always
     environment:
       - FUNGUS_ID=0
+      - NUM_OF_FUNGI=8
     env_file: ".env"
     ports:
       - 5000:5000
     depends_on: [ fuseki ]
+    volumes:
+      - ./logs:/logs
 
   fungus-backend1:
     build: fungus-backend
     restart: always
     environment:
       - FUNGUS_ID=1
+      - NUM_OF_FUNGI=8
     env_file: ".env"
     ports:
       - 5001:5001
     depends_on: [ fuseki ]
+    volumes:
+      - ./logs:/logs
 
   fungus-backend2:
     build: fungus-backend
     restart: always
     environment:
       - FUNGUS_ID=2
+      - NUM_OF_FUNGI=8
     env_file: ".env"
     ports:
       - 5002:5002
     depends_on: [ fuseki ]
+    volumes:
+      - ./logs:/logs
 
   fungus-backend3:
     build: fungus-backend
     restart: always
     environment:
       - FUNGUS_ID=3
+      - NUM_OF_FUNGI=8
     env_file: ".env"
     ports:
       - 5003:5003
     depends_on: [ fuseki ]
+    volumes:
+      - ./logs:/logs
 
   fungus-backend4:
     build: fungus-backend
     restart: always
     environment:
       - FUNGUS_ID=4
+      - NUM_OF_FUNGI=8
     env_file: ".env"
     ports:
       - 5004:5004
     depends_on: [ fuseki ]
+    volumes:
+      - ./logs:/logs
 
   fungus-backend5:
     build: fungus-backend
     restart: always
     environment:
       - FUNGUS_ID=5
+      - NUM_OF_FUNGI=8
     env_file: ".env"
     ports:
       - 5005:5005
     depends_on: [ fuseki ]
+    volumes:
+      - ./logs:/logs
 
   fungus-backend6:
     build: fungus-backend
     restart: always
     environment:
       - FUNGUS_ID=6
+      - NUM_OF_FUNGI=8
     env_file: ".env"
     ports:
       - 5006:5006
     depends_on: [ fuseki ]
+    volumes:
+      - ./logs:/logs
 
   fungus-backend7:
     build: fungus-backend
     restart: always
     environment:
       - FUNGUS_ID=7
+      - NUM_OF_FUNGI=8
     env_file: ".env"
     ports:
       - 5007:5007
     depends_on: [ fuseki ]
+    volumes:
+      - ./logs:/logs
 
 # -------------------------------------------------
 # ------------ ACTIVITY PUB CONTAINER -------------
@@ -94,6 +118,7 @@ services:
     restart: always
     environment:
       - FUNGUS_ID=0
+      - NUM_OF_FUNGI=8
     env_file: ".env"
     depends_on: [ fungus-backend0 ]
 
@@ -105,6 +130,7 @@ services:
     restart: always
     environment:
       - FUNGUS_ID=1
+      - NUM_OF_FUNGI=8
     env_file: ".env"
     depends_on: [ fungus-backend1 ]
 
@@ -116,6 +142,7 @@ services:
     restart: always
     environment:
       - FUNGUS_ID=2
+      - NUM_OF_FUNGI=8
     env_file: ".env"
     depends_on: [ fungus-backend2 ]
 
@@ -127,6 +154,7 @@ services:
     restart: always
     environment:
       - FUNGUS_ID=3
+      - NUM_OF_FUNGI=8
     env_file: ".env"
     depends_on: [ fungus-backend2 ]
 
@@ -138,6 +166,7 @@ services:
     restart: always
     environment:
       - FUNGUS_ID=4
+      - NUM_OF_FUNGI=8
     env_file: ".env"
     depends_on: [ fungus-backend0 ]
 
@@ -149,6 +178,7 @@ services:
     restart: always
     environment:
       - FUNGUS_ID=5
+      - NUM_OF_FUNGI=8
     env_file: ".env"
     depends_on: [ fungus-backend1 ]
 
@@ -160,6 +190,7 @@ services:
     restart: always
     environment:
       - FUNGUS_ID=6
+      - NUM_OF_FUNGI=8
     env_file: ".env"
     depends_on: [ fungus-backend2 ]
 
@@ -171,6 +202,7 @@ services:
     restart: always
     environment:
       - FUNGUS_ID=7
+      - NUM_OF_FUNGI=8
     env_file: ".env"
     depends_on: [ fungus-backend0 ]
 
