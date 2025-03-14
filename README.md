@@ -120,9 +120,20 @@ cd MyceliumWebServer
 
 [//]: # (4. Share gradients and aggregate other groups' models using the RDF graph to potentially switch groups.)
 
+You can start the container using docker:
+
 ```bash
 docker compose build
 docker compose up -d
+```
+
+,which runs three fungus nodes.
+
+For running eight fungus nodes, run:
+
+```bash
+docker compose -f docker-compose.8-nodes.yml build
+docker compose -f docker-compose.8-nodes.yml up -d
 ```
 
 ### 4. Interaction with the bot!

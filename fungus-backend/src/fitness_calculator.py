@@ -52,7 +52,7 @@ class FitnessCalculator:
                 song_result = [0]
                 similarity_scores.append(self.song_similarity_score(test_song, song_result))
             else:
-                similarity_scores.append(self.song_similarity_score(test_song, 0))
+                similarity_scores.append(0)
 
         correctness_ratio = np.mean(similarity_scores) if similarity_scores else 0.0
         random_factor = random.uniform(-0.1, 0.1) * correctness_ratio
