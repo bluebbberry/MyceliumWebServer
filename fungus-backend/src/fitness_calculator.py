@@ -49,7 +49,7 @@ class FitnessCalculator:
         for test_song in all_test_samples:
             results = self.machine_learning_service.get_song_recommendations(test_song)
             if len(results) > 0:
-                song_result = [0]
+                song_result = results[0]
                 similarity_scores.append(self.song_similarity_score(test_song, song_result))
             else:
                 similarity_scores.append(0)
