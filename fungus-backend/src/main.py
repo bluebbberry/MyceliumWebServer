@@ -171,7 +171,7 @@ class MusicRecommendationFungus:
 
     def decide_whether_to_switch_team(self, fitness):
         switch_decision = fitness < self.fitness_threshold
-        logging.info(f"[DECISION] Switch team: {switch_decision}")
+        logging.info(f"[DECISION] Switch team: {switch_decision} with fitness: {fitness} and fitness_threshold: {self.fitness_threshold}")
         return switch_decision
 
     def generate_random_code(self, length=16):
