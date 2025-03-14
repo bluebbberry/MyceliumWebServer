@@ -67,45 +67,79 @@ To provide a healthy, beneficial interrelation between centralized and decentral
 ### 1. Clone the Repo
 
 ```bash
-git clone https://github.com/bluebbberry/BabyFungus.git
-cd babyfungus
+git clone https://github.com/bluebbberry/MyceliumWebServer.git
+cd MyceliumWebServer
 ```
 
-### 2. Install Dependencies
+[//]: # (### 2. Install Dependencies)
 
-Set up a virtual environment (optional but recommended) and install the dependencies:
+[//]: # ()
+[//]: # (Set up a virtual environment &#40;optional but recommended&#41; and install the dependencies:)
 
-```bash
-python3 -m venv venv
-source venv/bin/activate  # Linux/MacOS
-# or
-venv\Scripts\activate     # Windows
+[//]: # ()
+[//]: # (```bash)
 
-pip install -r requirements.txt
-```
+[//]: # (python3 -m venv venv)
 
-### 3. Configure
+[//]: # (source venv/bin/activate  # Linux/MacOS)
+
+[//]: # (# or)
+
+[//]: # (venv\Scripts\activate     # Windows)
+
+[//]: # ()
+[//]: # (pip install -r requirements.txt)
+
+[//]: # (```)
+
+### 2. Configure
 
 - **RDF Knowledge Graph**: Make sure your Fuseki server is running and update the URLs in the .env-file (e.g., `FUSEKI_SERVER_URL`).
 - **Mastodon API**: Create a Mastodon API token and setup the connection in the .env-file (`MASTODON_API_KEY`, `MASTODON_INSTANCE_URL`, `ACCOUNT_NAME`).
 
-### 4. Run
+### 3. Run
 
-To start everything, run in the `/src`-folder:
+[//]: # ()
+[//]: # (To start everything, run in the `/src`-folder:)
+
+[//]: # ()
+[//]: # (```bash)
+
+[//]: # (python main.py)
+
+[//]: # (```)
+
+[//]: # ()
+[//]: # (The system will:)
+
+[//]: # (1. Train the model every five seconds.)
+
+[//]: # (2. Post updates to Mastodon.)
+
+[//]: # (3. Respond to Mastodon requests &#40;e.g., for predictions&#41;.)
+
+[//]: # (4. Share gradients and aggregate other groups' models using the RDF graph to potentially switch groups.)
 
 ```bash
-python main.py
+docker compose build
+docker compose up -d
 ```
 
-The system will:
-1. Train the model every five seconds.
-2. Post updates to Mastodon.
-3. Respond to Mastodon requests (e.g., for predictions).
-4. Share gradients and aggregate other groups' models using the RDF graph to potentially switch groups.
+### 4. Interaction with the bot!
 
-### 5. Interaction with the bot!
+Now your system is running, and you can interact with it over the fungi node's frontend, or, if you have set the correct environment-variables, on Mastodon by posting to `#babyfungus`. Ask for recommendations to a song you like and the system will respond.
 
-Now your system is running, and you can interact with it on Mastodon by posting to `#babyfungus`. Ask for recommendations to a song you like and the system will respond.
+### 5. Visualize the underlying mycelium web!
+
+The logs of the containers are written to log-files for each container under `./logs`.
+
+With the scripts under `visualization`, you can generate a gif-image from the logs, which displays the interaction between the fungi nodes.
+
+For this, do the following:
+
+1. Copy the logs from ALL log-files under `logs` into ONE log-file called `./logs.json` under `./visualization`
+2. Run `python filter_logs.py` to filter the relevant log-entries (the results are written to `filtered_logs.txt`)
+3. Execute `python visu.py`, which outputs `animation.gif`
 
 ## License
 
